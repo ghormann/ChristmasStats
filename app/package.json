@@ -1,0 +1,17 @@
+{
+  "name": "christmaslogger",
+  "version": "1.0.0",
+  "description": "Loggs MQTT events",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/hapi": "^18.4.0",
+    "@hapi/nes": "^11.2.2",
+    "mqtt": "^3.0.0",
+    "mysql": "^2.17.1"
+  }
+}
