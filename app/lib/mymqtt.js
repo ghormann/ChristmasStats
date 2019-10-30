@@ -72,6 +72,7 @@ async function publishResults() {
 }
 
 async function insertName(name, type) {
+  name = name.toUpperCase();
   console.log("inserting ", name, " ", type);
   try {
     await db.insertName(name, type);
