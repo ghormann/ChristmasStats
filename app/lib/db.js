@@ -28,31 +28,30 @@ function insertName(name, type) {
 }
 
 function insertEvent(name, argument) {
-    return new Promise(function(resolve, reject) {
-      pool.query(
-        "INSERT INTO event (name, argument) values (?,?)",
-        [name, argument],
-        function(error, results, fields) {
-          if (error) return reject(error);
-          resolve(true);
-        }
-      );
-    });
-  }
-  
+  return new Promise(function(resolve, reject) {
+    pool.query(
+      "INSERT INTO event (name, argument) values (?,?)",
+      [name, argument],
+      function(error, results, fields) {
+        if (error) return reject(error);
+        resolve(true);
+      }
+    );
+  });
+}
+
 function insertVote(id, source) {
-    return new Promise(function(resolve, reject) {
-      pool.query(
-        "INSERT INTO song (songid, source) values (?,?)",
-        [id, source],
-        function(error, results, fields) {
-          if (error) return reject(error);
-          resolve(true);
-        }
-      );
-    });
-  }
-  
+  return new Promise(function(resolve, reject) {
+    pool.query(
+      "INSERT INTO song (songid, source) values (?,?)",
+      [id, source],
+      function(error, results, fields) {
+        if (error) return reject(error);
+        resolve(true);
+      }
+    );
+  });
+}
 
 /*
  * Returns promise to get names
@@ -76,7 +75,30 @@ function getTopNames(minutes) {
   });
 }
 
+/*
+ * Returns promise to get votes
+ */
+function getTopSongs(minutes) {
+  let sql =
+    "select songid, count(1) CNT from song where ts > now() - interval ? minute group by songid order by 2 desc LIMIT 20";
+  return new Promise(function(resolve, reject) {
+    pool.query(sql, [minutes], function(error, results, fields) {
+      if (error) reject(error);
+      rc = [];
+      results.forEach(r => {
+        rc.push({
+          id: r.songid,
+          cnt: r.CNT
+        });
+      });
+
+      resolve(rc);
+    });
+  });
+}
+
 module.exports.insertName = insertName;
 module.exports.getTopNames = getTopNames;
+module.exports.getTopSongs = getTopSongs;
 module.exports.insertVote = insertVote;
 module.exports.insertEvent = insertEvent;

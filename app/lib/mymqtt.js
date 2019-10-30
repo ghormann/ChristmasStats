@@ -29,7 +29,7 @@ var handlers = [
     callback: async function(topic, message) {
       try {
         obj = JSON.parse(message.toString());
-        console.log('Vote ', obj);
+        console.log("Vote ", obj);
         await db.insertVote(obj.id, obj.source);
       } catch (e) {
         console.log(e);
@@ -41,25 +41,27 @@ var handlers = [
     callback: async function(topic, message) {
       try {
         msg = message.toString();
-        console.log('NameAction ', msg);
-        await db.insertEvent('nameAction', msg);
+        console.log("NameAction ", msg);
+        await db.insertEvent("nameAction", msg);
       } catch (e) {
         console.log(e);
       }
     }
   }
-
 ];
 
 async function publishResults() {
   topic = "/christmas/vote/stats";
   try {
     rc = {
-      topNames_1hr : await db.getTopNames(60),
-      topNames_24hr : await db.getTopNames(1440),
-      topNames_year : await db.getTopNames(525600),
-    }
-    console.log('Publishing ' , topic);
+      topNames_1hr: await db.getTopNames(60),
+      topNames_24hr: await db.getTopNames(1440),
+      topNames_year: await db.getTopNames(525600),
+      topSongs_1hr: await db.getTopSongs(60),
+      topSongs_24hr: await db.getTopSongs(1440),
+      topSongs_year: await db.getTopSongs(525600)
+    };
+    console.log("Publishing ", topic);
     client.publish(topic, JSON.stringify(rc), {}, function(err) {
       if (err) {
         console.log("Error publishing topic");
@@ -86,7 +88,8 @@ function init() {
   let config = JSON.parse(rawdata);
   let CA = [fs.readFileSync(config["ca_file"])];
 
-  setInterval(publishResults, 600000); // ever 10 minutes
+  setInterval(publishResults, 300000); // ever 5 minutes
+  //setInterval(publishResults, 10000); // debug
 
   let options = {
     host: config["host"],
