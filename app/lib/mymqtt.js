@@ -88,7 +88,7 @@ function init() {
   let config = JSON.parse(rawdata);
   let CA = [fs.readFileSync(config["ca_file"])];
 
-  setInterval(publishResults, 300000); // ever 5 minutes
+  setInterval(publishResults, 60000); // every 1 minutes
   //setInterval(publishResults, 10000); // debug
 
   let options = {
