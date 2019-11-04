@@ -76,9 +76,31 @@ function getTopNames(minutes) {
 }
 
 /*
+ * Returns promise to return the top Played Songs
+ */
+function getTopPlayedSongs(minutes) {
+  let sql =
+    "select argument, count(1) CNT from event where name = 'planSong' and ts > now() - interval ? minute group by argument order by 2 desc LIMIT 20";
+  return new Promise(function(resolve, reject) {
+    pool.query(sql, [minutes], function(error, results, fields) {
+      if (error) reject(error);
+      rc = [];
+      results.forEach(r => {
+        rc.push({
+          name: r.argument,
+          cnt: r.CNT
+        });
+      });
+
+      resolve(rc);
+    });
+  });
+}
+
+/*
  * Returns promise to get votes
  */
-function getTopSongs(minutes) {
+function getTopVotes(minutes) {
   let sql =
     "select songid, count(1) CNT from song where ts > now() - interval ? minute group by songid order by 2 desc LIMIT 20";
   return new Promise(function(resolve, reject) {
@@ -99,6 +121,7 @@ function getTopSongs(minutes) {
 
 module.exports.insertName = insertName;
 module.exports.getTopNames = getTopNames;
-module.exports.getTopSongs = getTopSongs;
+module.exports.getTopVotes = getTopVotes;
+module.exports.getTopPlayedSongs = getTopPlayedSongs;
 module.exports.insertVote = insertVote;
 module.exports.insertEvent = insertEvent;

@@ -4,6 +4,19 @@ const db = require("./db.js");
 
 var handlers = [
   {
+    topic: "/christmas/falcon/player/FPP.hormann.local/playlist/name/status",
+    callback: async function(topic, message) {
+      try {
+        name = message.toString();
+        if (name && name.length > 0) {
+          await db.insertEvent("planSong", name);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  },
+  {
     topic: "/christmas/personsName",
     callback: function(topic, message) {
       name = message.toString();
@@ -57,9 +70,12 @@ async function publishResults() {
       topNames_1hr: await db.getTopNames(60),
       topNames_24hr: await db.getTopNames(1440),
       topNames_year: await db.getTopNames(525600),
-      topSongs_1hr: await db.getTopSongs(60),
-      topSongs_24hr: await db.getTopSongs(1440),
-      topSongs_year: await db.getTopSongs(525600)
+      topSongs_1hr: await db.getTopVotes(60),
+      topSongs_24hr: await db.getTopVotes(1440),
+      topSongs_year: await db.getTopVotes(525600),
+      topPlayedSongs_1hr: await db.getTopPlayedSongs(60),
+      topPlayedSongs_24hr: await db.getTopPlayedSongs(1440),
+      topPlayedSongs_year: await db.getTopPlayedSongs(525600)
     };
     console.log("Publishing ", topic);
     client.publish(topic, JSON.stringify(rc), {}, function(err) {
