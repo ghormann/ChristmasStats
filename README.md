@@ -3,3 +3,6 @@ This contains the source code and docker scripts for a seperate container that m
 
 ## Scope
 This is currently a personal project, but feel free to use it as a starting point for your own effort. effort.
+
+## Notes
+the database must be named "mqtt" right now. (See db.env.sample)  This is hard coded in init.sql. 
