@@ -98,6 +98,63 @@ function getTopPlayedSongs(minutes) {
 }
 
 /*
+ * returns the unique number of voters across mulitple time periods
+ */
+function getUniqueVoters() {
+  all_minutes = [
+    {
+      minutes: 15,
+      label: "15 min"
+    },
+    {
+      minutes: 30,
+      label: "30 min"
+    },
+    {
+      minutes: 60,
+      label: "1 hour"
+    },
+    {
+      minutes: 120,
+      label: "2 hours"
+    },
+    {
+      minutes: 240,
+      label: "4 hours"
+    },
+    {
+      minutes: 1440,
+      label: "1 day"
+    },
+    {
+      minutes: 525600,
+      label: "1 year"
+    }
+  ];
+
+  let all = [];
+  all_minutes.forEach(function(r) {
+    all.push(buildUniqueVoterPromise(r));
+  });
+
+  return Promise.all(all);
+}
+
+function buildUniqueVoterPromise(obj) {
+  let sql =
+    "select count(distinct source) CNT from song where ts > now() - interval ? minute";
+  return new Promise(function(resolve, reject) {
+    pool.query(sql, [obj.minutes], function(error, results, fields) {
+      if (error) reject(error);
+      else {
+        obj.cnt = results[0].CNT;
+        resolve(obj);
+      }
+    });
+  });
+}
+
+/*
  * Returns promise to get votes
  */
 function getTopVotes(minutes) {
@@ -122,6 +179,7 @@ function getTopVotes(minutes) {
 module.exports.insertName = insertName;
 module.exports.getTopNames = getTopNames;
 module.exports.getTopVotes = getTopVotes;
+module.exports.getUniqueVoters = getUniqueVoters;
 module.exports.getTopPlayedSongs = getTopPlayedSongs;
 module.exports.insertVote = insertVote;
 module.exports.insertEvent = insertEvent;

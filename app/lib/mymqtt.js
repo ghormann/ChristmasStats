@@ -65,6 +65,7 @@ var handlers = [
 
 async function publishResults() {
   topic = "/christmas/vote/stats";
+
   try {
     rc = {
       topNames_1hr: await db.getTopNames(60),
@@ -75,7 +76,8 @@ async function publishResults() {
       topSongs_year: await db.getTopVotes(525600),
       topPlayedSongs_1hr: await db.getTopPlayedSongs(60),
       topPlayedSongs_24hr: await db.getTopPlayedSongs(1440),
-      topPlayedSongs_year: await db.getTopPlayedSongs(525600)
+      topPlayedSongs_year: await db.getTopPlayedSongs(525600),
+      topVoters: await db.getUniqueVoters()
     };
     console.log("Publishing ", topic);
     client.publish(topic, JSON.stringify(rc), {}, function(err) {
@@ -104,6 +106,7 @@ function init() {
   let config = JSON.parse(rawdata);
   let CA = [fs.readFileSync(config["ca_file"])];
 
+  setTimeout(publishResults, 5000);
   setInterval(publishResults, 60000); // every 1 minutes
   //setInterval(publishResults, 10000); // debug
 
