@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hapi/hapi": "^18.4.0",
+    "@hapi/hapi": "^18.4.1",
     "@hapi/nes": "^11.2.2",
     "mqtt": "^3.0.0",
     "mysql": "^2.17.1"
