@@ -19,22 +19,25 @@ var handlers = [
   {
     topic: "/christmas/personsName",
     callback: function(topic, message) {
+      data = JSON.parse(message.toString());
       name = message.toString();
-      insertName(name, "Normal");
+      insertName(data.name, data.from, "Normal");
     }
   },
   {
     topic: "/christmas/personsNameFront",
     callback: function(topic, message) {
+      data = JSON.parse(message.toString());
       name = message.toString();
-      insertName(name, "Front");
+      insertName(data.name, data.from, "Front");
     }
   },
   {
     topic: "/christmas/personsNameLow",
     callback: function(topic, message) {
+      data = JSON.parse(message.toString());
       name = message.toString();
-      insertName(name, "Low");
+      insertName(data.name, data.from, "Low");
     }
   },
   {
@@ -91,11 +94,11 @@ async function publishResults() {
   }
 }
 
-async function insertName(name, type) {
+async function insertName(name, source, type) {
   name = name.toUpperCase();
   console.log("inserting ", name, " ", type);
   try {
-    await db.insertName(name, type);
+    await db.insertName(name, source, type);
   } catch (e) {
     console.log(e);
   }

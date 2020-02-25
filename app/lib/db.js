@@ -14,11 +14,11 @@ pool.getConnection(function(err, connection) {
   connection.release();
 });
 
-function insertName(name, type) {
+function insertName(name, source, type) {
   return new Promise(function(resolve, reject) {
     pool.query(
-      "INSERT INTO name (name, name_type) values (?,?)",
-      [name, type],
+      "INSERT INTO name (name, source, name_type) values (?,?,?)",
+      [name, source, type],
       function(error, results, fields) {
         if (error) return reject(error);
         resolve(true);
