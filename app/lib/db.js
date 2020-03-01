@@ -14,6 +14,24 @@ pool.getConnection(function(err, connection) {
   connection.release();
 });
 
+function insertPower(song, sensor, total, data) {
+  return new Promise(function(resolve, reject) {
+    let input = [song, sensor, total];
+    data.forEach(e => {
+      input.push(e);
+    });
+
+    pool.query(
+      "INSERT INTO power (song, sensor, total, s1, s2, s3, s4, s5, s6, s7, s8, s9) values (?,?,?,?,?,?,?,?,?,?,?,?)",
+      input,
+      function(error, results, fields) {
+        if (error) return reject(error);
+        resolve(true);
+      }
+    );
+  });
+}
+
 function insertName(name, source, type) {
   return new Promise(function(resolve, reject) {
     pool.query(
@@ -154,7 +172,46 @@ function buildUniqueVoterPromise(obj) {
   });
 }
 
-/*
+function getTotalPower(minutes) {
+  let sql =
+    "select sum(total) power_total, avg(total) power_average from power where ts > now() - interval ? minute";
+    return new Promise(function(resolve, reject) {
+      pool.query(sql, [minutes], function(error, results, fields) {
+        if (error) reject(error);
+        rc = [];
+        results.forEach(r => {
+          rc.push({
+            total: r.power_total,
+            avg: r.power_average
+          });
+        });
+  
+        resolve(rc);
+      });
+    });
+  }
+
+
+function getSongPower(minutes) {
+  let sql =
+    "select song, sum(total) power_total, avg(total) power_average from power where ts > now() - interval ? minute group by song order by 2 desc";
+    return new Promise(function(resolve, reject) {
+      pool.query(sql, [minutes], function(error, results, fields) {
+        if (error) reject(error);
+        rc = [];
+        results.forEach(r => {
+          rc.push({
+            song: r.song,
+            total: r.power_total,
+            avg: r.power_average
+          });
+        });
+  
+        resolve(rc);
+      });
+    });
+  }
+  /*
  * Returns promise to get votes
  */
 function getTopVotes(minutes) {
@@ -183,3 +240,6 @@ module.exports.getUniqueVoters = getUniqueVoters;
 module.exports.getTopPlayedSongs = getTopPlayedSongs;
 module.exports.insertVote = insertVote;
 module.exports.insertEvent = insertEvent;
+module.exports.insertPower = insertPower;
+module.exports.getSongPower = getSongPower;
+module.exports.getTotalPower = getTotalPower;

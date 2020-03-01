@@ -2,7 +2,44 @@ const mqtt = require("mqtt");
 const fs = require("fs");
 const db = require("./db.js");
 
+var current_status = "Unknown";
+var current_song = "Unknown";
+
 var handlers = [
+  {
+    topic: "/christmas/power/Power1",
+    callback: async function(topic, message) {
+      try {
+        let data = JSON.parse(message.toString()); // should be array
+        let sensor = 1;
+        let total = 0.0;
+        data.forEach(function(e) {
+          total += e;
+        });
+        db.insertPower(current_song, sensor, total, data);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  },
+  {
+    topic: "/christmas/falcon/player/FPP.hormann.local/playlist_details",
+    callback: async function(topic, message) {
+      try {
+        let data = JSON.parse(message.toString());
+        current_status = data.status;
+        current_song = current_status;
+
+        if ("activePlaylists" in data) {
+          data.activePlaylists.forEach(function(e) {
+            current_song = e.name;
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  },
   {
     topic: "/christmas/falcon/player/FPP.hormann.local/playlist/name/status",
     callback: async function(topic, message) {
@@ -71,15 +108,20 @@ async function publishResults() {
 
   try {
     rc = {
+      songPower_1hr: await db.getSongPower(60),
+      songPower_24hr: await db.getSongPower(1440),
+      totalPower_1hr: await db.getTotalPower(60),
+      totalPower_24hr: await db.getTotalPower(1440),
+      totalPower_year: await db.getTotalPower(288000), // 200 days
       topNames_1hr: await db.getTopNames(60),
       topNames_24hr: await db.getTopNames(1440),
-      topNames_year: await db.getTopNames(525600),
+      topNames_year: await db.getTopNames(288000), // 200 days
       topSongs_1hr: await db.getTopVotes(60),
       topSongs_24hr: await db.getTopVotes(1440),
-      topSongs_year: await db.getTopVotes(525600),
+      topSongs_year: await db.getTopVotes(288000), // 200 days
       topPlayedSongs_1hr: await db.getTopPlayedSongs(60),
       topPlayedSongs_24hr: await db.getTopPlayedSongs(1440),
-      topPlayedSongs_year: await db.getTopPlayedSongs(525600),
+      topPlayedSongs_year: await db.getTopPlayedSongs(288000), // 200 days
       topVoters: await db.getUniqueVoters()
     };
     console.log("Publishing ", topic);
