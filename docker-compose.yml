@@ -3,7 +3,8 @@ version: '3'
 volumes:
   dbdata:
      driver: local
-
+  grafana_lib:
+     driver: local
 
 services:
   database:
@@ -24,4 +25,12 @@ services:
     restart: always
     extra_hosts:
        xmas-hp.hormann.local: 192.168.0.212
-
+  grafana:
+    image: grafana/grafana
+    ports:
+     - "3000:3000"
+    volumes:
+     - grafana_lib:/var/lib/grafana
+    depends_on:
+    - database
+    
