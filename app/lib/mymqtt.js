@@ -194,9 +194,10 @@ function init() {
   setInterval(publishResults, 60000); // every 1 minutes
   //setInterval(publishResults, 10000); // debug
 
-  // Reload daily power on startup and every 8 minutes
+  // Reload daily power on startup and every 240 minutes
+  // Forces a reset when day changes
   setTimeout(refreshDailyPower, 5000);
-  setInterval(refreshDailyPower, 60000 * 8); // every 8 minutes
+  setInterval(refreshDailyPower, 60000 * 240); 
 
   // Publish Daily power every 2 seconds
   setInterval(publishTodayPower, 2000);
