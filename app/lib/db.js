@@ -1,7 +1,6 @@
 const mysql = require("mysql"); // First you need to create a connection to the db
 const moment = require("moment");
 
-
 var pool = mysql.createPool({
   connectionLimit: 5,
   host: "database",
@@ -15,6 +14,10 @@ pool.getConnection(function (err, connection) {
   console.log("Connected to DB");
   connection.release();
 });
+
+function getPricePerKWH() {
+  return 0.086;
+}
 
 function insertPower(song, sensor, total, data) {
   return new Promise(function (resolve, reject) {
@@ -98,7 +101,7 @@ function getTopNames(minutes) {
 function getPowerToday() {
   let sql =
     "select count(1) CNT, sum(total) TOT, min(ts) MINTS from power where ts > ?;";
-  let dtStr =  moment().subtract(5, 'hours').format("YYYY-MM-DD");
+  let dtStr = moment().subtract(5, "hours").format("YYYY-MM-DD");
   console.log(dtStr);
   return new Promise(function (resolve, reject) {
     pool.query(sql, [dtStr], function (error, results, fields) {
@@ -108,7 +111,7 @@ function getPowerToday() {
         rc.push({
           total: r.TOT,
           cnt: r.CNT,
-          mints: r.MINTS
+          mints: r.MINTS,
         });
       });
 
@@ -199,35 +202,52 @@ function buildUniqueVoterPromise(obj) {
 
 function getTotalPower(minutes) {
   let sql =
-    "select sum(total) power_total, avg(total) power_average from power where ts > now() - interval ? minute";
+    "select sum(total) power_total, avg(total) power_average, count(1) cnt from power where ts > now() - interval ? minute";
   return new Promise(function (resolve, reject) {
     pool.query(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
+        let wattSeconds = 115 * r.power_total;
+        let minutes = r.cnt / 60;
+        let kwh = wattSeconds / 3600000;
+        let dollars = kwh * getPricePerKWH();
+        let avgWatt = r.power_average * 115;
+
         rc.push({
-          total: r.power_total,
-          avg: r.power_average,
+          wattSeconds,
+          minutes,
+          kwh,
+          dollars,
+          avgWatt,
         });
       });
 
-      resolve(rc);
+      resolve(rc[0]);
     });
   });
 }
 
 function getSongPower(minutes) {
   let sql =
-    "select song, sum(total) power_total, avg(total) power_average from power where ts > now() - interval ? minute group by song order by 2 desc";
+    "select song, sum(total) power_total, avg(total) power_average, count(1) cnt from power where ts > now() - interval ? minute group by song order by 2 desc";
   return new Promise(function (resolve, reject) {
     pool.query(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
+        let wattSeconds = 115 * r.power_total;
+        let minutes = r.cnt / 60;
+        let kwh = wattSeconds / 3600000;
+        let dollars = kwh * getPricePerKWH();
+        let avgWatt = r.power_average * 115;
         rc.push({
           song: r.song,
-          total: r.power_total,
-          avg: r.power_average,
+          wattSeconds,
+          minutes,
+          kwh,
+          dollars,
+          avgWatt,
         });
       });
 
@@ -268,3 +288,4 @@ module.exports.insertPower = insertPower;
 module.exports.getSongPower = getSongPower;
 module.exports.getTotalPower = getTotalPower;
 module.exports.getPowerToday = getPowerToday;
+module.exports.getPricePerKWH = getPricePerKWH;

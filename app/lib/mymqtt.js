@@ -115,7 +115,7 @@ function publishTodayPower() {
   let wattSeconds = 115 * today_power.total;
   let hours = today_power.cnt / 3600;
   let kwh = wattSeconds / 3600000;
-  let dollars = kwh * 0.086;
+  let dollars = kwh * db.getPricePerKWH();
   let cnt = today_power.cnt;
   let avgWatt = kwh / hours * 1000;
   let rc = {
