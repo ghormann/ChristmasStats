@@ -90,7 +90,7 @@ var handlers = [
       try {
         obj = JSON.parse(message.toString());
         console.log("Vote ", obj);
-        await db.insertVote(obj.id, obj.source);
+        await db.insertVote(obj.playlist, obj.source);
       } catch (e) {
         console.log(e);
       }

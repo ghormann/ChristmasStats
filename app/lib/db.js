@@ -63,11 +63,11 @@ function insertEvent(name, argument) {
   });
 }
 
-function insertVote(id, source) {
+function insertVote(playlist, source) {
   return new Promise(function (resolve, reject) {
     pool.query(
-      "INSERT INTO song (songid, source) values (?,?)",
-      [id, source],
+      "INSERT INTO song_vote (playlist, source) values (?,?)",
+      [playlist, source],
       function (error, results, fields) {
         if (error) return reject(error);
         resolve(true);
@@ -188,7 +188,7 @@ function getUniqueVoters() {
 
 function buildUniqueVoterPromise(obj) {
   let sql =
-    "select count(distinct source) CNT from song where ts > now() - interval ? minute";
+    "select count(distinct source) CNT from song_vote where ts > now() - interval ? minute";
   return new Promise(function (resolve, reject) {
     pool.query(sql, [obj.minutes], function (error, results, fields) {
       if (error) reject(error);
@@ -260,14 +260,14 @@ function getSongPower(minutes) {
  */
 function getTopVotes(minutes) {
   let sql =
-    "select songid, count(1) CNT from song where ts > now() - interval ? minute group by songid order by 2 desc LIMIT 20";
+    "select playlist, count(1) CNT from song_vote where ts > now() - interval ? minute group by playlist order by 2 desc LIMIT 20";
   return new Promise(function (resolve, reject) {
     pool.query(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
         rc.push({
-          id: r.songid,
+          playlist: r.playlist,
           cnt: r.CNT,
         });
       });
