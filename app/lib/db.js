@@ -126,7 +126,7 @@ function getPowerToday() {
  */
 function getTopPlayedSongs(minutes) {
   let sql =
-    "select argument, count(1) CNT from event where name = 'planSong' and argument not in ('TuneTo','off','Intro','Good_Night', 'TheHormanns') and argument not like 'Test%' and argument not like 'Midnight%' and ts > now() - interval ? minute group by argument order by 2 desc LIMIT 20";
+    "select argument, count(1) CNT from event where name = 'planSong' and argument not in ('TuneTo','off','Intro','Good_Night', 'TheHormanns') and argument not like 'Test%' and argument not like 'Internal%' and argument not like 'Midnight%' and ts > now() - interval ? minute group by argument order by 2 desc LIMIT 20";
   return new Promise(function (resolve, reject) {
     pool.query(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
