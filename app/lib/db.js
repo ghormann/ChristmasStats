@@ -230,7 +230,7 @@ function getTotalPower(minutes) {
 
 function getSongPower(minutes) {
   let sql =
-    "select song, sum(total) power_total, avg(total) power_average, count(1) cnt from power where ts > now() - interval ? minute group by song order by 2 desc";
+    "select song, sum(total) power_total, avg(total) power_average, count(1) cnt from power where ts > now() - interval ? minute and song not like 'Test%' and song not like 'Internal%' and song not like 'Midnight%' group by song order by 2 desc";
   return new Promise(function (resolve, reject) {
     pool.query(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
