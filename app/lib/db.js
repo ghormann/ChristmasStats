@@ -214,6 +214,12 @@ function getTotalPower(minutes) {
         let dollars = kwh * getPricePerKWH();
         let avgWatt = r.power_average * 115;
 
+        wattSeconds = Math.round(wattSeconds * 100) / 100;
+        minutes = Math.round(minutes * 100) / 100;
+        kwh = Math.round(kwh * 100) / 100;
+        dollars = Math.round(dollars * 100) / 100;
+        avgWatt = Math.round(avgWatt * 100) / 100;
+
         rc.push({
           wattSeconds,
           minutes,
@@ -241,6 +247,13 @@ function getSongPower(minutes) {
         let kwh = wattSeconds / 3600000;
         let dollars = kwh * getPricePerKWH();
         let avgWatt = r.power_average * 115;
+
+        wattSeconds = Math.round(wattSeconds * 100) / 100;
+        minutes = Math.round(minutes * 100) / 100;
+        kwh = Math.round(kwh * 100) / 100;
+        dollars = Math.round(dollars * 100) / 100;
+        avgWatt = Math.round(avgWatt * 100) / 100;
+        
         rc.push({
           song: r.song,
           wattSeconds,
