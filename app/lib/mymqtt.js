@@ -140,6 +140,7 @@ async function publishResults() {
     rc = {
       songPower_1hr: await db.getSongPower(60),
       songPower_24hr: await db.getSongPower(1440),
+      songPower_year: await db.getSongPower(288000), //200 days
       totalPower_1hr: await db.getTotalPower(60),
       totalPower_24hr: await db.getTotalPower(1440),
       totalPower_year: await db.getTotalPower(288000), // 200 days
