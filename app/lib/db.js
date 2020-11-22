@@ -63,6 +63,20 @@ function insertEvent(name, argument) {
   });
 }
 
+function insertSnowmanVote(name, source) {
+  console.log("Inserting ", name, source);
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      "INSERT INTO snowman_vote (snowman, source) values (?,?)",
+      [name, source],
+      function (error, results, fields) {
+        if (error) return reject(error);
+        resolve(true);
+      }
+    );
+  });
+}
+
 function insertVote(playlist, source) {
   return new Promise(function (resolve, reject) {
     pool.query(
@@ -291,6 +305,7 @@ function getTopVotes(minutes) {
 }
 
 module.exports.insertName = insertName;
+module.exports.insertSnowmanVote = insertSnowmanVote;
 module.exports.getTopNames = getTopNames;
 module.exports.getTopVotes = getTopVotes;
 module.exports.getUniqueVoters = getUniqueVoters;

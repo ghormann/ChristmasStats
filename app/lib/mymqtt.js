@@ -97,6 +97,19 @@ var handlers = [
     },
   },
   {
+    topic: "/christmas/snowmanvote/add",
+    callback: async function (topic, message) {
+      try {
+        obj = JSON.parse(message.toString());
+        console.log("Snowman Vote here:", obj);
+        await db.insertSnowmanVote(obj.name, obj.source);
+        console.log("Snowman done");
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  },
+  {
     topic: "/christmas/nameAction",
     callback: async function (topic, message) {
       try {
