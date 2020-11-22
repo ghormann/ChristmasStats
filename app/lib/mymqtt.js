@@ -9,6 +9,11 @@ var today_power = {
   cnt: 0,
 };
 
+var cache_yearPower = {
+  when: 0,
+  data: [],
+}
+
 var handlers = [
   {
     topic: "/christmas/power/Power1",
@@ -146,6 +151,20 @@ function publishTodayPower() {
   });
 }
 
+async function getYearPower() 
+{
+   let now = new Date().getTime();
+   let diff = now - cache_yearPower.when;
+  
+   // only refresh every 20 min 
+   if ( diff > 1000 * 60*20) {  
+      console.log("Freshing yearly power: ", diff);
+      cache_yearPower.data = await db.getTotalPower(288000), // 200 days
+      cache_yearPower.when = now;
+   }
+   return cache_yearPower.data;
+}
+
 async function publishResults() {
   let topic = "/christmas/vote/stats";
 
@@ -153,10 +172,9 @@ async function publishResults() {
     rc = {
       songPower_1hr: await db.getSongPower(60),
       songPower_24hr: await db.getSongPower(1440),
-      songPower_year: await db.getSongPower(288000), //200 days
       totalPower_1hr: await db.getTotalPower(60),
       totalPower_24hr: await db.getTotalPower(1440),
-      totalPower_year: await db.getTotalPower(288000), // 200 days
+      totalPower_year: await getYearPower(),
       topNames_1hr: await db.getTopNames(60),
       topNames_24hr: await db.getTopNames(1440),
       topNames_year: await db.getTopNames(288000), // 200 days

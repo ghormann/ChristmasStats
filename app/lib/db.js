@@ -9,6 +9,17 @@ var pool = mysql.createPool({
   database: process.env.MYSQL_DATABASE,
 });
 
+function myQuery(sql,values,resolve) {
+   let start = new Date().getTime();
+   pool.query(sql,values, function(error,results,fields) {
+      let duration = new Date().getTime() - start;
+      if (duration > 1000) {
+         console.log (sql, " took: ", new Date().getTime() - start);
+      }
+      resolve(error,results,fields);
+   });
+}
+
 pool.getConnection(function (err, connection) {
   if (err) throw err; // not connected!
   console.log("Connected to DB");
@@ -97,7 +108,7 @@ function getTopNames(minutes) {
   let sql =
     "select name, count(1) CNT from name where ts > now() - interval ? minute group by name order by 2 desc LIMIT 20";
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [minutes], function (error, results, fields) {
+    myQuery(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
@@ -118,7 +129,7 @@ function getPowerToday() {
   let dtStr = moment().subtract(5, "hours").format("YYYY-MM-DD");
   console.log(dtStr);
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [dtStr], function (error, results, fields) {
+    myQuery(sql, [dtStr], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
@@ -142,7 +153,7 @@ function getTopPlayedSongs(minutes) {
   let sql =
     "select argument, count(1) CNT from event where name = 'planSong' and argument not in ('TuneTo','off','Intro','Good_Night', 'TheHormanns') and argument not like 'Test%' and argument not like 'Internal%' and argument not like 'Midnight%' and ts > now() - interval ? minute group by argument order by 2 desc LIMIT 20";
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [minutes], function (error, results, fields) {
+    myQuery(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
@@ -204,7 +215,7 @@ function buildUniqueVoterPromise(obj) {
   let sql =
     "select count(distinct source) CNT from song_vote where ts > now() - interval ? minute";
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [obj.minutes], function (error, results, fields) {
+    myQuery(sql, [obj.minutes], function (error, results, fields) {
       if (error) reject(error);
       else {
         obj.cnt = results[0].CNT;
@@ -218,7 +229,7 @@ function getTotalPower(minutes) {
   let sql =
     "select sum(total) power_total, avg(total) power_average, count(1) cnt from power where ts > now() - interval ? minute";
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [minutes], function (error, results, fields) {
+    myQuery(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
@@ -252,7 +263,7 @@ function getSongPower(minutes) {
   let sql =
     "select song, sum(total) power_total, avg(total) power_average, count(1) cnt from power where ts > now() - interval ? minute and song not like 'Test%' and song not like 'Internal%' and song not like 'Midnight%' group by song order by 2 desc";
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [minutes], function (error, results, fields) {
+    myQuery(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
@@ -289,7 +300,7 @@ function getTopVotes(minutes) {
   let sql =
     "select playlist, count(1) CNT from song_vote where ts > now() - interval ? minute group by playlist order by 2 desc LIMIT 20";
   return new Promise(function (resolve, reject) {
-    pool.query(sql, [minutes], function (error, results, fields) {
+    myQuery(sql, [minutes], function (error, results, fields) {
       if (error) reject(error);
       rc = [];
       results.forEach((r) => {
