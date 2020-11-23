@@ -178,9 +178,13 @@ async function publishResults() {
       topNames_1hr: await db.getTopNames(60),
       topNames_24hr: await db.getTopNames(1440),
       topNames_year: await db.getTopNames(288000), // 200 days
+      topSongs_15min: await db.getTopVotes(15),
       topSongs_1hr: await db.getTopVotes(60),
       topSongs_24hr: await db.getTopVotes(1440),
       topSongs_year: await db.getTopVotes(288000), // 200 days
+      topSnowmen_1hr: await db.getTopSnowmenVotes(60),
+      topSnowmen_24hr: await db.getTopSnowmenVotes(1440),
+      topSnowmen_year: await db.getTopSnowmenVotes(288000), // 200 days
       topPlayedSongs_1hr: await db.getTopPlayedSongs(60),
       topPlayedSongs_24hr: await db.getTopPlayedSongs(1440),
       topPlayedSongs_year: await db.getTopPlayedSongs(288000), // 200 days

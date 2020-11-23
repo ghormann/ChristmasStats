@@ -75,7 +75,6 @@ function insertEvent(name, argument) {
 }
 
 function insertSnowmanVote(name, source) {
-  console.log("Inserting ", name, source);
   return new Promise(function (resolve, reject) {
     pool.query(
       "INSERT INTO snowman_vote (snowman, source) values (?,?)",
@@ -315,6 +314,29 @@ function getTopVotes(minutes) {
   });
 }
 
+/*
+ * Returns promise to get votes
+ */
+function getTopSnowmenVotes(minutes) {
+  let sql =
+    "select snowman, count(1) CNT from snowman_vote where ts > now() - interval ? minute group by snowman order by 2 desc LIMIT 20";
+  return new Promise(function (resolve, reject) {
+    myQuery(sql, [minutes], function (error, results, fields) {
+      if (error) reject(error);
+      rc = [];
+      results.forEach((r) => {
+        rc.push({
+          snowman: r.snowman,
+          cnt: r.CNT,
+        });
+      });
+
+      resolve(rc);
+    });
+  });
+}
+
+
 module.exports.insertName = insertName;
 module.exports.insertSnowmanVote = insertSnowmanVote;
 module.exports.getTopNames = getTopNames;
@@ -328,3 +350,4 @@ module.exports.getSongPower = getSongPower;
 module.exports.getTotalPower = getTotalPower;
 module.exports.getPowerToday = getPowerToday;
 module.exports.getPricePerKWH = getPricePerKWH;
+module.exports.getTopSnowmenVotes = getTopSnowmenVotes;
