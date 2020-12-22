@@ -189,6 +189,7 @@ async function publishResults() {
       topPlayedSongs_24hr: await db.getTopPlayedSongs(1440),
       topPlayedSongs_year: await db.getTopPlayedSongs(288000), // 200 days
       topVoters: await db.getUniqueVoters(),
+      topPhones: await db.getUniquePhones(),
     };
     console.log("Publishing ", topic);
     client.publish(topic, JSON.stringify(rc), {}, function (err) {

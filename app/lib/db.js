@@ -101,6 +101,63 @@ function insertVote(playlist, source) {
 }
 
 /*
+ * returns the unique number of voters across mulitple time periods
+ */
+function getUniquePhones() {
+  all_minutes = [
+    {
+      minutes: 15,
+      label: "15 min",
+    },
+    {
+      minutes: 30,
+      label: "30 min",
+    },
+    {
+      minutes: 60,
+      label: "1 hour",
+    },
+    {
+      minutes: 120,
+      label: "2 hours",
+    },
+    {
+      minutes: 240,
+      label: "4 hours",
+    },
+    {
+      minutes: 1440,
+      label: "1 day",
+    },
+    {
+      minutes: 525600,
+      label: "1 year",
+    },
+  ];
+
+  let all = [];
+  all_minutes.forEach(function (r) {
+    all.push(buildUniquePhonePromise(r));
+  });
+
+  return Promise.all(all);
+}
+
+function buildUniquePhonePromise(obj) {
+  let sql =
+    "select count(distinct source) CNT from name where ts > now() - interval ? minute";
+  return new Promise(function (resolve, reject) {
+    myQuery(sql, [obj.minutes], function (error, results, fields) {
+      if (error) reject(error);
+      else {
+        obj.cnt = results[0].CNT;
+        resolve(obj);
+      }
+    });
+  });
+}
+
+/*
  * Returns promise to get names
  */
 function getTopNames(minutes) {
@@ -351,3 +408,4 @@ module.exports.getTotalPower = getTotalPower;
 module.exports.getPowerToday = getPowerToday;
 module.exports.getPricePerKWH = getPricePerKWH;
 module.exports.getTopSnowmenVotes = getTopSnowmenVotes;
+module.exports.getUniquePhones = getUniquePhones;
