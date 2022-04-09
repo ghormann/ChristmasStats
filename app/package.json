@@ -11,7 +11,7 @@
   "dependencies": {
     "@hapi/hapi": "^20.0.0",
     "@hapi/nes": "^12.0.4",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "mqtt": "^4.3.7",
     "mysql": "^2.18.1"
   }
