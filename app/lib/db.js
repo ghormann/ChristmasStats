@@ -27,7 +27,7 @@ pool.getConnection(function (err, connection) {
 });
 
 function getPricePerKWH() {
-  return 0.086;
+  return 0.120;
 }
 
 function insertPower(song, sensor, total, data) {
