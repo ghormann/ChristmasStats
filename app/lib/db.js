@@ -130,7 +130,7 @@ function getUniquePhones() {
       label: "1 day",
     },
     {
-      minutes: 525600,
+      minutes: 432000,
       label: "1 year",
     },
   ];
@@ -254,7 +254,7 @@ function getUniqueVoters() {
       label: "1 day",
     },
     {
-      minutes: 525600,
+      minutes: 432000,
       label: "1 year",
     },
   ];
