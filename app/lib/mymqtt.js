@@ -35,7 +35,7 @@ var handlers = [
     },
   },
   {
-    topic: "/christmas/falcon/player/FPP.hormann.local/playlist_details",
+    topic: "/christmas/falcon/player/fpp2/playlist_details",
     callback: async function (topic, message) {
       try {
         let data = JSON.parse(message.toString());
@@ -53,7 +53,7 @@ var handlers = [
     },
   },
   {
-    topic: "/christmas/falcon/player/FPP.hormann.local/playlist/name/status",
+    topic: "/christmas/falcon/player/fpp2/playlist/name/status",
     callback: async function (topic, message) {
       try {
         name = message.toString();
