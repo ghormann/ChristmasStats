@@ -187,6 +187,9 @@ async function publishResults() {
             topNames_1hr: await db.getTopNames(60),
             topNames_24hr: await db.getTopNames(1440),
             topNames_year: await db.getTopNames(288000), // 200 days
+            topButton_1hr: await db.getTopButtons(60),
+            topButton_24hr: await db.getTopButtons(1440),
+            topButton_year: await db.getTopButtons(288000), // 200 days
             topSongs_15min: await db.getTopVotes(15),
             topSongs_1hr: await db.getTopVotes(60),
             topSongs_24hr: await db.getTopVotes(1440),
@@ -199,8 +202,10 @@ async function publishResults() {
             topPlayedSongs_year: await db.getTopPlayedSongs(288000), // 200 days
             topVoters: await db.getUniqueVoters(),
             topPhones: await db.getUniquePhones(),
+            uptime: process.uptime() 
         };
         console.log("Publishing ", topic);
+        console.log(rc);
         client.publish(topic, JSON.stringify(rc), {}, function (err) {
             if (err) {
                 console.log("Error publishing topic: ", topic);

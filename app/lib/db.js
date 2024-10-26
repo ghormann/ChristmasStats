@@ -170,6 +170,27 @@ function getTopNames(minutes) {
     });
 }
 
+/*
+ * Returns promise to get names
+ */
+function getTopButtons(minutes) {
+    let sql = "select button, count(1) CNT from button where ts > now() - interval ? minute group by button order by 2 desc LIMIT 20";
+    return new Promise(function (resolve, reject) {
+        myQuery(sql, [minutes], function (error, results, fields) {
+            if (error) reject(error);
+            rc = [];
+            results.forEach((r) => {
+                rc.push({
+                    button: r.button,
+                    cnt: r.CNT,
+                });
+            });
+
+            resolve(rc);
+        });
+    });
+}
+
 function getPowerToday() {
     let sql = "select count(1) CNT, sum(total) TOT, min(ts) MINTS from power where ts > ?;";
     let dtStr = moment().subtract(5, "hours").format("YYYY-MM-DD");
@@ -394,4 +415,5 @@ module.exports.getTotalPower = getTotalPower;
 module.exports.getPowerToday = getPowerToday;
 module.exports.getPricePerKWH = getPricePerKWH;
 module.exports.getTopSnowmenVotes = getTopSnowmenVotes;
+module.exports.getTopButtons = getTopButtons;
 module.exports.getUniquePhones = getUniquePhones;
