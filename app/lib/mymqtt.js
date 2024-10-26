@@ -116,12 +116,24 @@ var handlers = [
         },
     },
     {
-        topic: "/christmas/FPPButton/#",
+        topic: "/christmas/FPPButton/+",
         callback: async function (topic) {
             let parts = topic.split("/");
             let color = parts[3];
-            console.log(topic, color);
             await db.insertButton(color);
+        },
+    },
+    {
+        topic: "/christmas/falcon/player/+/fppd_status",
+        callback: async function (topic, message) {
+            let data = JSON.parse(message.toString())
+            let parts = topic.split("/");
+            let device = parts[4];
+            if ("sensors" in data) {
+                for (const sensor of data.sensors) {
+                    await db.insertSensor(device, sensor.label, sensor.value, sensor.valueType);
+                }
+            }
         },
     },
     {
@@ -167,7 +179,7 @@ async function getYearPower() {
 
     // only refresh every 20 min
     if (diff > 1000 * 60 * 20) {
-        console.log("Freshing yearly power: ", diff);
+        console.log("Refreshing yearly power: ", diff);
         (cache_yearPower.data = await db.getTotalPower(288000)), // 200 days
             (cache_yearPower.when = now);
     }
@@ -205,7 +217,6 @@ async function publishResults() {
             uptime: process.uptime() 
         };
         console.log("Publishing ", topic);
-        console.log(rc);
         client.publish(topic, JSON.stringify(rc), {}, function (err) {
             if (err) {
                 console.log("Error publishing topic: ", topic);

@@ -48,6 +48,15 @@ function insertPower(song, sensor, total, data) {
     });
 }
 
+function insertSensor(device, sensor, value, label) {
+    return new Promise(function (resolve, reject) {
+        pool.query("INSERT INTO sensor (device, sensor, value, label) values (?,?,?,?)", [device, sensor, value, label], function (error, results, fields) {
+            if (error) return reject(error);
+            resolve(true);
+        });
+    });
+}
+
 function insertName(name, source, type) {
     return new Promise(function (resolve, reject) {
         pool.query("INSERT INTO name (name, source, name_type) values (?,?,?)", [name, source, type], function (error, results, fields) {
@@ -417,3 +426,4 @@ module.exports.getPricePerKWH = getPricePerKWH;
 module.exports.getTopSnowmenVotes = getTopSnowmenVotes;
 module.exports.getTopButtons = getTopButtons;
 module.exports.getUniquePhones = getUniquePhones;
+module.exports.insertSensor = insertSensor;
