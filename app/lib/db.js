@@ -61,6 +61,20 @@ function insertName(name, source, type) {
   });
 }
 
+function insertButton(button) {
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      "INSERT INTO button (button) values (?)",
+      [button],
+      function (error, results, fields) {
+        if (error) return reject(error);
+        resolve(true);
+      }
+    );
+  });
+}
+
+
 function insertEvent(name, argument) {
   return new Promise(function (resolve, reject) {
     pool.query(
@@ -403,6 +417,7 @@ module.exports.getTopPlayedSongs = getTopPlayedSongs;
 module.exports.insertVote = insertVote;
 module.exports.insertEvent = insertEvent;
 module.exports.insertPower = insertPower;
+module.exports.insertButton = insertButton;
 module.exports.getSongPower = getSongPower;
 module.exports.getTotalPower = getTotalPower;
 module.exports.getPowerToday = getPowerToday;

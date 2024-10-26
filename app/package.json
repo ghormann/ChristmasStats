@@ -9,10 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@hapi/hapi": "^20.0.0",
-    "@hapi/nes": "^12.0.4",
-    "moment": "^2.29.2",
-    "mqtt": "^4.3.7",
+    "moment": "^2.30.1",
+    "mqtt": "^5.10.1",
     "mysql": "^2.18.1"
   }
 }
