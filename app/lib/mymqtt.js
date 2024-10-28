@@ -137,6 +137,45 @@ var handlers = [
         },
     },
     {
+        topic: "shelly/+/status/temperature:0",
+        callback: async function (topic, message) {
+            let data = JSON.parse(message.toString())
+            let parts = topic.split("/");
+            let device = parts[1];
+            if ("tF" in data) {
+                console.log('Temp: ', data.tF)
+                await db.insertSensor(device, "tF", data.tF, "temperature");
+            }
+        },
+    },
+    {
+        topic: "shelly/+/status/humidity:0",
+        callback: async function (topic, message) {
+            let data = JSON.parse(message.toString())
+            let parts = topic.split("/");
+            let device = parts[1];
+            if ("rh" in data) {
+                console.log('humidity: ', data.rh)
+                await db.insertSensor(device, "rh", data.rh, "humidity");
+            }
+        },
+    },
+    {
+        topic: "shelly/+/status/devicepower:0",
+        callback: async function (topic, message) {
+            let data = JSON.parse(message.toString())
+            let parts = topic.split("/");
+            let device = parts[1];
+            if ("battery" in data) {
+                console.log('Bat PCT: ', data.battery.percent)
+                console.log('Bat Voltage: ', data.battery.V)
+                await db.insertSensor(device, "Battery_Percentage", data.battery.percent, "Battery");
+                await db.insertSensor(device, "Battery_Voltage", data.battery.V, "Voltage");
+            }
+        },
+    },
+
+    {
         topic: "/christmas/nameAction",
         callback: async function (topic, message) {
             try {
