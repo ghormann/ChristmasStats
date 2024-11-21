@@ -134,6 +134,9 @@ var handlers = [
                     await db.insertSensor(device, sensor.label, sensor.value, sensor.valueType);
                 }
             }
+            if ("uptimeDays" in data) {
+                await db.insertSensor(device, 'fpp uptime', data["uptimeDays"], 'Days');
+            }
         },
     },
     {
