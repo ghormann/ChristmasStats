@@ -306,27 +306,29 @@ function getTotalPower(minutes) {
         myQuery(sql, [minutes], function (error, results, fields) {
             if (error) reject(error);
             rc = [];
-            results.forEach((r) => {
-                let wattSeconds = 115 * r.power_total;
-                let minutes = r.cnt / 60;
-                let kwh = wattSeconds / 3600000;
-                let dollars = kwh * getPricePerKWH();
-                let avgWatt = r.power_average * 115;
+            if (results) {
+                results.forEach((r) => {
+                    let wattSeconds = 115 * r.power_total;
+                    let minutes = r.cnt / 60;
+                    let kwh = wattSeconds / 3600000;
+                    let dollars = kwh * getPricePerKWH();
+                    let avgWatt = r.power_average * 115;
 
-                wattSeconds = Math.round(wattSeconds * 100) / 100;
-                minutes = Math.round(minutes * 100) / 100;
-                kwh = Math.round(kwh * 100) / 100;
-                dollars = Math.round(dollars * 100) / 100;
-                avgWatt = Math.round(avgWatt * 100) / 100;
+                    wattSeconds = Math.round(wattSeconds * 100) / 100;
+                    minutes = Math.round(minutes * 100) / 100;
+                    kwh = Math.round(kwh * 100) / 100;
+                    dollars = Math.round(dollars * 100) / 100;
+                    avgWatt = Math.round(avgWatt * 100) / 100;
 
-                rc.push({
-                    wattSeconds,
-                    minutes,
-                    kwh,
-                    dollars,
-                    avgWatt,
+                    rc.push({
+                        wattSeconds,
+                        minutes,
+                        kwh,
+                        dollars,
+                        avgWatt,
+                    });
                 });
-            });
+            }
 
             resolve(rc[0]);
         });
