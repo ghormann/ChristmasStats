@@ -242,6 +242,7 @@ async function publishResults() {
             topNames_24hr: await db.getTopNames(1440),
             topNames_year: await db.getTopNames(288000), // 200 days
             topButton_1hr: await db.getTopButtons(60),
+            topButton_12hr: await db.getTopButtons(720),
             topButton_24hr: await db.getTopButtons(1440),
             topButton_year: await db.getTopButtons(288000), // 200 days
             topSongs_15min: await db.getTopVotes(15),
