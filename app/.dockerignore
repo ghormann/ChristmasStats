@@ -1,0 +1,6 @@
+node_modules
+__tests__
+.npm
+*.log
+ca.crt
+greglights_config.json
