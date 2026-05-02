@@ -1,6 +1,5 @@
 const mqtt = require("mqtt");
 const mqttPattern = require("mqtt-pattern");
-const fs = require("fs");
 const db = require("./db.js");
 
 var current_status = "Unknown";
@@ -14,6 +13,8 @@ var cache_yearPower = {
     when: 0,
     data: [],
 };
+
+var config = {};
 
 var handlers = [
     {
@@ -193,23 +194,17 @@ var handlers = [
 ];
 
 function publishTodayPower() {
-    let topic = "/christmas/todayPower";
+    let topic = '/christmas/todayPower';
     let wattSeconds = 115 * today_power.total;
     let hours = today_power.cnt / 3600;
     let kwh = wattSeconds / 3600000;
-    let dollars = kwh * db.getPricePerKWH();
+    let dollars = kwh * config.pricePerKWH;
     let cnt = today_power.cnt;
     let avgWatt = (kwh / hours) * 1000;
-    let rc = {
-        hours,
-        avgWatt,
-        kwh,
-        dollars,
-        cnt,
-    };
+    let rc = { hours, avgWatt, kwh, dollars, cnt };
     client.publish(topic, JSON.stringify(rc), {}, function (err) {
         if (err) {
-            console.log("Error publishing topic: ", topic);
+            console.log('Error publishing topic: ', topic);
             console.log(err);
         }
     });
@@ -228,36 +223,45 @@ async function getYearPower() {
     return cache_yearPower.data;
 }
 
+function addDollars(powerResult, pricePerKWH) {
+    if (!powerResult) return powerResult;
+    return { ...powerResult, dollars: Math.round(powerResult.kwh * pricePerKWH * 100) / 100 };
+}
+
+function addSongDollars(songs, pricePerKWH) {
+    return songs.map(s => ({ ...s, dollars: Math.round(s.kwh * pricePerKWH * 100) / 100 }));
+}
+
 async function publishResults() {
     let topic = "/christmas/vote/stats";
 
     try {
         rc = {
-            songPower_1hr: await db.getSongPower(60),
-            songPower_24hr: await db.getSongPower(1440),
-            totalPower_1hr: await db.getTotalPower(60),
-            totalPower_24hr: await db.getTotalPower(1440),
-            totalPower_year: await getYearPower(),
-            topNames_1hr: await db.getTopNames(60),
-            topNames_24hr: await db.getTopNames(1440),
-            topNames_year: await db.getTopNames(288000), // 200 days
-            topButton_1hr: await db.getTopButtons(60),
-            topButton_12hr: await db.getTopButtons(720),
-            topButton_24hr: await db.getTopButtons(1440),
-            topButton_year: await db.getTopButtons(288000), // 200 days
-            topSongs_15min: await db.getTopVotes(15),
-            topSongs_1hr: await db.getTopVotes(60),
-            topSongs_24hr: await db.getTopVotes(1440),
-            topSongs_year: await db.getTopVotes(288000), // 200 days
-            topSnowmen_1hr: await db.getTopSnowmenVotes(60),
-            topSnowmen_24hr: await db.getTopSnowmenVotes(1440),
-            topSnowmen_year: await db.getTopSnowmenVotes(288000), // 200 days
-            topPlayedSongs_1hr: await db.getTopPlayedSongs(60),
-            topPlayedSongs_24hr: await db.getTopPlayedSongs(1440),
-            topPlayedSongs_year: await db.getTopPlayedSongs(288000), // 200 days
-            topVoters: await db.getUniqueVoters(),
-            topPhones: await db.getUniquePhones(),
-            uptime: process.uptime() 
+            songPower_1hr:        addSongDollars(await db.getSongPower(60), config.pricePerKWH),
+            songPower_24hr:       addSongDollars(await db.getSongPower(1440), config.pricePerKWH),
+            totalPower_1hr:       addDollars(await db.getTotalPower(60), config.pricePerKWH),
+            totalPower_24hr:      addDollars(await db.getTotalPower(1440), config.pricePerKWH),
+            totalPower_year:      addDollars(await getYearPower(), config.pricePerKWH),
+            topNames_1hr:         await db.getTopNames(60),
+            topNames_24hr:        await db.getTopNames(1440),
+            topNames_year:        await db.getTopNames(288000),
+            topButton_1hr:        await db.getTopButtons(60),
+            topButton_12hr:       await db.getTopButtons(720),
+            topButton_24hr:       await db.getTopButtons(1440),
+            topButton_year:       await db.getTopButtons(288000),
+            topSongs_15min:       await db.getTopVotes(15),
+            topSongs_1hr:         await db.getTopVotes(60),
+            topSongs_24hr:        await db.getTopVotes(1440),
+            topSongs_year:        await db.getTopVotes(288000),
+            topSnowmen_1hr:       await db.getTopSnowmenVotes(60),
+            topSnowmen_24hr:      await db.getTopSnowmenVotes(1440),
+            topSnowmen_year:      await db.getTopSnowmenVotes(288000),
+            topPlayedSongs_1hr:   await db.getTopPlayedSongs(60),
+            topPlayedSongs_24hr:  await db.getTopPlayedSongs(1440),
+            topPlayedSongs_year:  await db.getTopPlayedSongs(288000),
+            topVoters:            await db.getUniqueVoters(),
+            topPhones:            await db.getUniquePhones(),
+            uptime:               process.uptime(),
         };
         console.log("Publishing ", topic);
         client.publish(topic, JSON.stringify(rc), {}, function (err) {
@@ -289,9 +293,8 @@ async function refreshDailyPower() {
     }
 }
 
-function init() {
-    let rawdata = fs.readFileSync("greglights_config.json");
-    let config = JSON.parse(rawdata);
+function init(cfg) {
+    config = cfg;
     //let CA = [fs.readFileSync(config["ca_file"])];
 
     // Publish results on Startup and every 1 minute

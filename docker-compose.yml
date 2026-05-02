@@ -1,37 +1,13 @@
 version: '3'
 
-volumes:
-  dbdata:
-     driver: local
-  grafana_lib:
-     driver: local
-
 services:
-  database:
-    image: mysql:5.7
-    env_file:
-    - db.env
-    command: --init-file /data/application/init.sql
-    volumes:
-     - dbdata:/var/lib/mysql
-     - ./init.sql:/data/application/init.sql
-    restart: always
   app:
     build: app/.
     env_file:
-    - db.env
-    depends_on:
-    - database
+      - pg.env
+    volumes:
+      - ./greglights_config.json:/app/greglights_config.json:ro
     restart: always
     extra_hosts:
-       xmas-hp.hormann.local: 192.168.0.212
-  grafana:
-    image: grafana/grafana
-    restart: always
-    ports:
-     - "3000:3000"
-    volumes:
-     - grafana_lib:/var/lib/grafana
-    depends_on:
-    - database
-    
+      xmas-hp.hormann.local: 192.168.0.212
+

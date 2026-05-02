@@ -4,14 +4,18 @@
   "description": "Loggs MQTT events",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "start": "node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "moment": "^2.30.1",
     "mqtt": "^5.10.1",
     "mqtt-pattern": "^2.1.0",
-    "mysql": "^2.18.1"
+    "node-pg-migrate": "^7.0.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
   }
 }
