@@ -1,6 +1,6 @@
 # Christmas Stats
 
-A Node.js service that monitors MQTT traffic from a Christmas light show and stores time-series data for display and analysis. It subscribes to topics published by [Christmas Vote Now](https://bitbucket.org/ghormann/christmas-vote-now) and supporting hardware, then aggregates and republishes statistics every minute.
+A Node.js service that monitors MQTT traffic from a Christmas light show and stores time-series data for display and analysis. It subscribes to topics published by [Christmas Vote Now](https://github.com/ghormann/Christmas-Vote-now) and supporting hardware, then aggregates and republishes statistics every minute.
 
 ## Overview
 
