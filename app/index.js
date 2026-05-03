@@ -27,6 +27,8 @@ function validateConfig(config) {
 }
 
 const start = async () => {
+    const configPath = path.resolve('greglights_config.json');
+    console.log("reading config from ", configPath);
     const config = JSON.parse(fs.readFileSync('greglights_config.json', 'utf8'));
     validateConfig(config);
 
