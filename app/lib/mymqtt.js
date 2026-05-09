@@ -234,6 +234,7 @@ function addSongDollars(songs, pricePerKWH) {
 
 async function publishResults() {
     let topic = "/christmas/vote/stats";
+    let startTime = Date.now();
 
     try {
         rc = {
@@ -263,7 +264,7 @@ async function publishResults() {
             topPhones:            await db.getUniquePhones(),
             uptime:               process.uptime(),
         };
-        console.log("Publishing ", topic);
+        console.log(`Publishing ${topic} (${Date.now() - startTime}ms)`);
         client.publish(topic, JSON.stringify(rc), {}, function (err) {
             if (err) {
                 console.log("Error publishing topic: ", topic);
@@ -286,8 +287,10 @@ async function insertName(name, source, type) {
 }
 
 async function refreshDailyPower() {
+    let startTime = Date.now();
     try {
         today_power = await db.getPowerToday();
+        console.log(`refreshDailyPower took ${Date.now() - startTime}ms`);
     } catch (e) {
         console.log(e);
     }
