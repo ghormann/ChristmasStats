@@ -68,7 +68,7 @@ async function getUniquePhones() {
     ];
     return Promise.all(periods.map(async (p) => {
         const { rows } = await pool.query(
-            `SELECT COUNT(DISTINCT source) cnt FROM name WHERE ts > NOW() - ($1 * INTERVAL '1 minute')`,
+            `SELECT COUNT(DISTINCT source)::int cnt FROM name WHERE ts > NOW() - ($1 * INTERVAL '1 minute')`,
             [p.minutes]
         );
         return { ...p, cnt: rows[0].cnt };
@@ -77,7 +77,7 @@ async function getUniquePhones() {
 
 async function getTopNames(minutes) {
     const { rows } = await pool.query(
-        `SELECT name, COUNT(1) cnt FROM name WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY name ORDER BY 2 DESC LIMIT 20`,
+        `SELECT name, COUNT(1)::int cnt FROM name WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY name ORDER BY 2 DESC LIMIT 20`,
         [minutes]
     );
     return rows.map(r => ({ name: r.name, cnt: r.cnt }));
@@ -85,7 +85,7 @@ async function getTopNames(minutes) {
 
 async function getTopButtons(minutes) {
     const { rows } = await pool.query(
-        `SELECT button, COUNT(1) cnt FROM button WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY button ORDER BY 2 DESC LIMIT 20`,
+        `SELECT button, COUNT(1)::int cnt FROM button WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY button ORDER BY 2 DESC LIMIT 20`,
         [minutes]
     );
     return rows.map(r => ({ button: r.button, cnt: r.cnt }));
@@ -93,7 +93,7 @@ async function getTopButtons(minutes) {
 
 async function getPowerToday() {
     const { rows } = await pool.query(
-        `SELECT COUNT(1) cnt, SUM(total) tot, MIN(ts) mints FROM power WHERE ts > CURRENT_DATE - INTERVAL '5 hours'`
+        `SELECT COUNT(1)::int cnt, SUM(total)::float8 tot, MIN(ts) mints FROM power WHERE ts > CURRENT_DATE - INTERVAL '5 hours'`
     );
     const r = rows[0];
     return { total: r.tot, cnt: r.cnt, mints: r.mints };
@@ -101,7 +101,7 @@ async function getPowerToday() {
 
 async function getTopPlayedSongs(minutes) {
     const { rows } = await pool.query(
-        `SELECT argument, COUNT(1) cnt FROM event WHERE name = 'planSong'
+        `SELECT argument, COUNT(1)::int cnt FROM event WHERE name = 'planSong'
          AND argument NOT IN ('TuneTo','off','Intro','Good_Night','TheHormanns')
          AND argument NOT LIKE 'Test%' AND argument NOT LIKE 'Internal%' AND argument NOT LIKE 'Midnight%'
          AND ts > NOW() - ($1 * INTERVAL '1 minute')
@@ -123,7 +123,7 @@ async function getUniqueVoters() {
     ];
     return Promise.all(periods.map(async (p) => {
         const { rows } = await pool.query(
-            `SELECT COUNT(DISTINCT source) cnt FROM song_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute')`,
+            `SELECT COUNT(DISTINCT source)::int cnt FROM song_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute')`,
             [p.minutes]
         );
         return { ...p, cnt: rows[0].cnt };
@@ -132,7 +132,7 @@ async function getUniqueVoters() {
 
 async function getTotalPower(minutes) {
     const { rows } = await pool.query(
-        `SELECT SUM(total) power_total, AVG(total) power_average, COUNT(1) cnt FROM power WHERE ts > NOW() - ($1 * INTERVAL '1 minute')`,
+        `SELECT SUM(total)::float8 power_total, AVG(total)::float8 power_average, COUNT(1)::int cnt FROM power WHERE ts > NOW() - ($1 * INTERVAL '1 minute')`,
         [minutes]
     );
     const r = rows[0];
@@ -146,7 +146,7 @@ async function getTotalPower(minutes) {
 
 async function getSongPower(minutes) {
     const { rows } = await pool.query(
-        `SELECT song, SUM(total) power_total, AVG(total) power_average, COUNT(1) cnt FROM power
+        `SELECT song, SUM(total)::float8 power_total, AVG(total)::float8 power_average, COUNT(1)::int cnt FROM power
          WHERE ts > NOW() - ($1 * INTERVAL '1 minute')
          AND song NOT LIKE 'Test%' AND song NOT LIKE 'Internal%' AND song NOT LIKE 'Midnight%'
          GROUP BY song ORDER BY 2 DESC`,
@@ -163,7 +163,7 @@ async function getSongPower(minutes) {
 
 async function getTopVotes(minutes) {
     const { rows } = await pool.query(
-        `SELECT playlist, COUNT(1) cnt FROM song_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY playlist ORDER BY 2 DESC LIMIT 20`,
+        `SELECT playlist, COUNT(1)::int cnt FROM song_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY playlist ORDER BY 2 DESC LIMIT 20`,
         [minutes]
     );
     return rows.map(r => ({ playlist: r.playlist, cnt: r.cnt }));
@@ -171,7 +171,7 @@ async function getTopVotes(minutes) {
 
 async function getTopSnowmenVotes(minutes) {
     const { rows } = await pool.query(
-        `SELECT snowman, COUNT(1) cnt FROM snowman_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY snowman ORDER BY 2 DESC LIMIT 20`,
+        `SELECT snowman, COUNT(1)::int cnt FROM snowman_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY snowman ORDER BY 2 DESC LIMIT 20`,
         [minutes]
     );
     return rows.map(r => ({ snowman: r.snowman, cnt: r.cnt }));

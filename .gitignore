@@ -4,3 +4,4 @@ app/node_modules
 async-limiter
 db.env
 pg.env
+.env

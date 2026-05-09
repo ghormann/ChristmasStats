@@ -5,5 +5,5 @@
   "port": 8883,
   "host": "test.mqtt.org",
   "send_enabled": false,
-  "pricePerKWH": 0.12
+  "pricePerKWH": 0.18
 }

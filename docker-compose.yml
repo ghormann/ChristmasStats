@@ -6,7 +6,7 @@ services:
     env_file:
       - pg.env
     volumes:
-      - ./greglights_config.json:/app/greglights_config.json:ro
+      - ./greglights_config.json:/usr/src/app/greglights_config.json:ro
     restart: always
     extra_hosts:
       xmas-hp.hormann.local: 192.168.0.212
