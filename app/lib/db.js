@@ -49,6 +49,13 @@ async function insertSnowmanVote(name, source) {
     );
 }
 
+async function insertCarCount(camera, count, processing_seconds, status) {
+    await pool.query(
+        'INSERT INTO car_counting (camera, count, processing_seconds, status) VALUES ($1, $2, $3, $4)',
+        [camera, count, processing_seconds, status]
+    );
+}
+
 async function insertVote(playlist, source) {
     await pool.query(
         'INSERT INTO song_vote (playlist, source) VALUES ($1, $2)',
@@ -196,4 +203,5 @@ module.exports = {
     getTopButtons,
     getUniquePhones,
     insertSensor,
+    insertCarCount,
 };
