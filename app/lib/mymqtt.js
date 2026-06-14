@@ -180,6 +180,19 @@ var handlers = [
     },
 
     {
+        topic: "car-counter/+",
+        callback: async function (topic, message) {
+            try {
+                let data = JSON.parse(message.toString());
+                let parts = topic.split("/");
+                let camera = parts[1];
+                await db.insertCarCount(camera, data.count, data.processing_seconds, data.status);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    },
+    {
         topic: "/christmas/nameAction",
         callback: async function (topic, message) {
             try {
