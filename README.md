@@ -84,7 +84,17 @@ cp app/greglights_config_example.json app/greglights_config.json
 | `send_enabled`          | Whether to publish stats back to MQTT             |
 | `pricePerKWH`           | Electricity rate used to calculate cost estimates |
 
-### 2. PostgreSQL credentials — `pg.env`
+### 2. MQTT client ID
+
+The app subscribes with a persistent session (`clean: false`) at QoS 1, so the broker retains the subscription and queues messages published while the app is offline (e.g. during a restart). This only works if the client reconnects with the *same* client ID each time — by default the app generates a random ID on every connection, which defeats it. Set `MQTT_CLIENT_ID` to a stable value:
+
+```bash
+MQTT_CLIENT_ID=christmas-stats-prod
+```
+
+Note: your broker must also be configured to retain sessions long enough to survive the restart window (session/message expiry), or queued messages will still be dropped.
+
+### 3. PostgreSQL credentials — `pg.env`
 
 ```bash
 cp pg.env.sample pg.env

@@ -334,17 +334,20 @@ function init(cfg) {
         //protocol: "mqtts",
         protocol: "mqtt",
         //ca: CA,
-        clientId: "vote_" + Math.random().toString(16).substr(2, 8),
+        clientId: process.env.MQTT_CLIENT_ID || "vote_" + Math.random().toString(16).substr(2, 8),
         //secureProtocol: "TLSv1_2_method",
         protocolId: "MQIsdp",
         protocolVersion: 3,
+        // clean:false requires a stable clientId (set MQTT_CLIENT_ID) so the broker
+        // can persist our subscriptions and queue QoS>0 messages across restarts.
+        clean: false,
     };
 
     client = mqtt.connect(options);
     client.on("connect", function () {
         console.log("MQTT Connect");
         handlers.forEach(function (h) {
-            client.subscribe(h.topic, function (err) {
+            client.subscribe(h.topic, { qos: 1 }, function (err) {
                 if (err) {
                     console.log("Failed to subscribe to ", h.topic);
                 }
