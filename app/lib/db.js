@@ -176,6 +176,30 @@ async function getTopVotes(minutes) {
     return rows.map(r => ({ playlist: r.playlist, cnt: r.cnt }));
 }
 
+async function getMaxCars(minutes) {
+    // Max per camera per minute avoids summing two cameras' peaks that
+    // happened at different times; summing those per-minute maxes across
+    // cameras, then taking the max over the window, gives the real peak
+    // concurrent car count.
+    const { rows } = await pool.query(
+        `WITH camera_minute AS (
+             SELECT camera, time_bucket('1 minute', ts) AS minute, MAX(count) AS max_count
+             FROM car_counting
+             WHERE ts > NOW() - ($1 * INTERVAL '1 minute')
+             GROUP BY camera, minute
+         ),
+         minute_totals AS (
+             SELECT minute, SUM(max_count)::int AS total_count
+             FROM camera_minute
+             GROUP BY minute
+         )
+         SELECT total_count, minute FROM minute_totals ORDER BY total_count DESC LIMIT 1`,
+        [minutes]
+    );
+    if (rows.length === 0) return { maxCars: 0, at: null };
+    return { maxCars: rows[0].total_count, at: rows[0].minute };
+}
+
 async function getTopSnowmenVotes(minutes) {
     const { rows } = await pool.query(
         `SELECT snowman, COUNT(1)::int cnt FROM snowman_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute') GROUP BY snowman ORDER BY 2 DESC LIMIT 20`,
@@ -204,4 +228,5 @@ module.exports = {
     getUniquePhones,
     insertSensor,
     insertCarCount,
+    getMaxCars,
 };
