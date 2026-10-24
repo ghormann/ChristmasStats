@@ -195,3 +195,83 @@ describe('getPowerToday', () => {
         expect(result).toHaveProperty('mints');
     });
 });
+
+describe('insertNameQueue', () => {
+    it('inserts with correct SQL and params', async () => {
+        mockQuery.mockResolvedValue({ rows: [] });
+        await db.insertNameQueue(4, 1, 13, 'READY');
+        expect(mockQuery).toHaveBeenCalledWith(
+            'INSERT INTO name_queue (normal_cnt, low_cnt, ready_cnt, status) VALUES ($1, $2, $3, $4)',
+            [4, 1, 13, 'READY']
+        );
+    });
+});
+
+describe('insertNameEstimate', () => {
+    it('inserts with correct SQL and params', async () => {
+        mockQuery.mockResolvedValue({ rows: [] });
+        await db.insertNameEstimate(180, 'in about 3 minutes');
+        expect(mockQuery).toHaveBeenCalledWith(
+            'INSERT INTO name_estimate (estimated_seconds, message) VALUES ($1, $2)',
+            [180, 'in about 3 minutes']
+        );
+    });
+});
+
+describe('insertSmsReceived', () => {
+    it('inserts with correct SQL and params', async () => {
+        mockQuery.mockResolvedValue({ rows: [] });
+        await db.insertSmsReceived({
+            ts: 1734300000.5,
+            from: '+15131234567',
+            text: 'Doug and Zxqv',
+            names: ['DOUG'],
+            result: 'approved',
+            quoted_seconds: 240,
+            city: 'CINCINNATI',
+            state: 'OH',
+            zip: '45202',
+            country: 'US',
+        });
+        expect(mockQuery).toHaveBeenCalledWith(
+            'INSERT INTO sms_received (ts, phone, body, names, result, quoted_seconds, city, state, zip, country) VALUES (to_timestamp($1), $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+            [1734300000.5, '+15131234567', 'Doug and Zxqv', ['DOUG'], 'approved', 240, 'CINCINNATI', 'OH', '45202', 'US']
+        );
+    });
+
+    it('stores null for missing optional fields', async () => {
+        mockQuery.mockResolvedValue({ rows: [] });
+        await db.insertSmsReceived({ ts: 1, from: '+1', text: 'x', result: 'rejected' });
+        expect(mockQuery.mock.calls[0][1]).toEqual([1, '+1', 'x', [], 'rejected', null, null, null, null, null]);
+    });
+});
+
+describe('insertNameBatch', () => {
+    it('inserts one row per name in a single query', async () => {
+        mockQuery.mockResolvedValue({ rows: [] });
+        await db.insertNameBatch(1734300600, [
+            { name: 'DOUG', from: '+15131234567', ts: 1734300000.5 },
+            { name: 'MARY', from: 'System', ts: 1734300599 },
+        ]);
+        expect(mockQuery).toHaveBeenCalledWith(
+            'INSERT INTO name_batch (ts, name, source, submitted_ts) SELECT to_timestamp($1), n, s, to_timestamp(t) FROM unnest($2::text[], $3::text[], $4::float8[]) AS u(n, s, t)',
+            [1734300600, ['DOUG', 'MARY'], ['+15131234567', 'System'], [1734300000.5, 1734300599]]
+        );
+    });
+
+    it('does nothing for an empty batch', async () => {
+        await db.insertNameBatch(1734300600, []);
+        expect(mockQuery).not.toHaveBeenCalled();
+    });
+});
+
+describe('insertWebsiteVisitors', () => {
+    it('inserts with correct SQL and params', async () => {
+        mockQuery.mockResolvedValue({ rows: [] });
+        await db.insertWebsiteVisitors(42);
+        expect(mockQuery).toHaveBeenCalledWith(
+            'INSERT INTO website_visitors (connected) VALUES ($1)',
+            [42]
+        );
+    });
+});

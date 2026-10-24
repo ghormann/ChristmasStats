@@ -1,0 +1,173 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_CHRISTMAS",
+      "label": "Christmas Stats (TimescaleDB)",
+      "type": "datasource",
+      "pluginId": "grafana-postgresql-datasource",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "uid": "xmas-name-wait",
+  "title": "Name Wait: Quoted vs Actual",
+  "tags": [
+    "christmas"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Wait per name (by time displayed)",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "points",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "always",
+            "pointSize": 6,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT displayed_ts AS time, wait_seconds AS \"Actual wait\", quoted_seconds AS \"Quoted wait\"\nFROM name_wait\nWHERE $__timeFilter(displayed_ts)\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Nightly averages",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 12
+      },
+      "options": {
+        "showHeader": true
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (displayed_ts AT TIME ZONE 'America/New_York')::date AS \"Night\",\n       COUNT(*) AS \"Names\",\n       ROUND(AVG(wait_seconds) / 60.0, 1) AS \"Avg actual (min)\",\n       ROUND(AVG(quoted_seconds) / 60.0, 1) AS \"Avg quoted (min)\",\n       ROUND(AVG(wait_seconds - quoted_seconds) / 60.0, 1) AS \"Avg actual - quoted (min)\",\n       ROUND(MAX(wait_seconds) / 60.0, 1) AS \"Longest (min)\"\nFROM name_wait\nWHERE $__timeFilter(displayed_ts)\nGROUP BY 1\nORDER BY 1 DESC"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Scheduler estimate over time",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "pointSize": 6,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT ts AS time, estimated_seconds AS \"Estimate\"\nFROM name_estimate\nWHERE $__timeFilter(ts)\nORDER BY 1"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  }
+}

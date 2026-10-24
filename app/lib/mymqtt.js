@@ -1,6 +1,7 @@
 const mqtt = require("mqtt");
 const mqttPattern = require("mqtt-pattern");
 const db = require("./db.js");
+const { createRecorder } = require("./recorder.js");
 
 var current_status = "Unknown";
 var current_song = "Unknown";
@@ -15,6 +16,11 @@ var cache_yearPower = {
 };
 
 var config = {};
+
+// nameQueue arrives every ~2s and name_estimate every ~1s; only keep rows
+// that say something new, plus a heartbeat so flat periods are visible.
+const nameQueueRecorder = createRecorder({ minIntervalMs: 0, heartbeatMs: 60000 });
+const nameEstimateRecorder = createRecorder({ minIntervalMs: 15000, heartbeatMs: 60000 });
 
 var handlers = [
     {
@@ -199,6 +205,70 @@ var handlers = [
                 msg = message.toString();
                 console.log("NameAction ", msg);
                 await db.insertEvent("nameAction", msg);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    },
+    {
+        topic: "/christmas/nameQueue",
+        callback: async function (topic, message) {
+            try {
+                let data = JSON.parse(message.toString());
+                let normal = (data.normal || []).length;
+                let low = (data.low || []).length;
+                let ready = (data.ready || []).length;
+                let key = [normal, low, ready, data.status].join("|");
+                if (nameQueueRecorder.shouldRecord(key)) {
+                    await db.insertNameQueue(normal, low, ready, data.status);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    },
+    {
+        topic: "/christmas/scheduler/name_estimate",
+        callback: async function (topic, message) {
+            try {
+                let data = JSON.parse(message.toString());
+                let key = data.estimated_seconds + "|" + data.message;
+                if (nameEstimateRecorder.shouldRecord(key)) {
+                    await db.insertNameEstimate(data.estimated_seconds, data.message);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    },
+    {
+        topic: "/christmas/sms/received",
+        callback: async function (topic, message) {
+            try {
+                let data = JSON.parse(message.toString());
+                await db.insertSmsReceived(data);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    },
+    {
+        topic: "/christmas/nameBatch",
+        callback: async function (topic, message) {
+            try {
+                let data = JSON.parse(message.toString());
+                await db.insertNameBatch(data.ts, data.names);
+            } catch (e) {
+                console.log(e);
+            }
+        },
+    },
+    {
+        topic: "/christmas/vote/visitors",
+        callback: async function (topic, message) {
+            try {
+                let data = JSON.parse(message.toString());
+                await db.insertWebsiteVisitors(data.connected);
             } catch (e) {
                 console.log(e);
             }
