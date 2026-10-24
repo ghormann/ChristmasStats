@@ -79,9 +79,9 @@ async function insertNameEstimate(estimated_seconds, message) {
 
 async function insertSmsReceived(sms) {
     await pool.query(
-        'INSERT INTO sms_received (ts, phone, body, names, result, quoted_seconds, city, state, zip, country) VALUES (to_timestamp($1), $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+        'INSERT INTO sms_received (ts, phone, body, name, result, quoted_seconds, city, state, zip, country) VALUES (to_timestamp($1), $2, $3, $4, $5, $6, $7, $8, $9, $10)',
         [
-            sms.ts, sms.from, sms.text, sms.names || [], sms.result,
+            sms.ts, sms.from, sms.text, sms.name ?? null, sms.result,
             sms.quoted_seconds ?? null, sms.city ?? null, sms.state ?? null, sms.zip ?? null, sms.country ?? null,
         ]
     );

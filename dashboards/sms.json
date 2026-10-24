@@ -25,7 +25,7 @@
     {
       "id": 1,
       "type": "timeseries",
-      "title": "Texts per 15 min by result",
+      "title": "Names texted per 15 min by result",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_CHRISTMAS}"
@@ -78,7 +78,7 @@
     {
       "id": 2,
       "type": "table",
-      "title": "Most common non-approved texts",
+      "title": "Most common non-approved names",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_CHRISTMAS}"
@@ -106,7 +106,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT UPPER(TRIM(body)) AS \"Text\", COUNT(*) AS \"Times\", COUNT(DISTINCT phone) AS \"Phones\", MAX(ts) AS \"Last seen\"\nFROM sms_received\nWHERE $__timeFilter(ts) AND result = 'rejected'\nGROUP BY 1\nORDER BY 2 DESC\nLIMIT 50"
+          "rawSql": "SELECT name AS \"Name\", COUNT(*) AS \"Times\", COUNT(DISTINCT phone) AS \"Phones\", MAX(ts) AS \"Last seen\"\nFROM sms_received\nWHERE $__timeFilter(ts) AND result = 'rejected' AND name IS NOT NULL\nGROUP BY 1\nORDER BY 2 DESC\nLIMIT 50"
         }
       ]
     },
@@ -141,7 +141,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT city AS \"City\", state AS \"State\", zip AS \"Zip\", COUNT(DISTINCT phone) AS \"Phones\", COUNT(*) AS \"Texts\"\nFROM sms_received\nWHERE $__timeFilter(ts)\nGROUP BY 1, 2, 3\nORDER BY 4 DESC\nLIMIT 50"
+          "rawSql": "SELECT city AS \"City\", state AS \"State\", zip AS \"Zip\", COUNT(DISTINCT phone) AS \"Phones\", COUNT(DISTINCT (phone, ts)) AS \"Texts\"\nFROM sms_received\nWHERE $__timeFilter(ts)\nGROUP BY 1, 2, 3\nORDER BY 4 DESC\nLIMIT 50"
         }
       ]
     }
