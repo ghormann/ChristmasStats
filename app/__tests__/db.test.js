@@ -225,7 +225,7 @@ describe('insertSmsReceived', () => {
             ts: 1734300000.5,
             from: '+15131234567',
             text: 'Doug and Zxqv',
-            names: ['DOUG'],
+            name: 'DOUG',
             result: 'approved',
             quoted_seconds: 240,
             city: 'CINCINNATI',
@@ -234,15 +234,15 @@ describe('insertSmsReceived', () => {
             country: 'US',
         });
         expect(mockQuery).toHaveBeenCalledWith(
-            'INSERT INTO sms_received (ts, phone, body, names, result, quoted_seconds, city, state, zip, country) VALUES (to_timestamp($1), $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-            [1734300000.5, '+15131234567', 'Doug and Zxqv', ['DOUG'], 'approved', 240, 'CINCINNATI', 'OH', '45202', 'US']
+            'INSERT INTO sms_received (ts, phone, body, name, result, quoted_seconds, city, state, zip, country) VALUES (to_timestamp($1), $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+            [1734300000.5, '+15131234567', 'Doug and Zxqv', 'DOUG', 'approved', 240, 'CINCINNATI', 'OH', '45202', 'US']
         );
     });
 
     it('stores null for missing optional fields', async () => {
         mockQuery.mockResolvedValue({ rows: [] });
         await db.insertSmsReceived({ ts: 1, from: '+1', text: 'x', result: 'rejected' });
-        expect(mockQuery.mock.calls[0][1]).toEqual([1, '+1', 'x', [], 'rejected', null, null, null, null, null]);
+        expect(mockQuery.mock.calls[0][1]).toEqual([1, '+1', 'x', null, 'rejected', null, null, null, null, null]);
     });
 });
 

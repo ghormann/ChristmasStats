@@ -23,7 +23,7 @@ Capture only. Nothing new is added to `/christmas/vote/stats` until capture is p
 | --- | --- | --- | --- |
 | `/christmas/nameQueue` | xlights-render (existing) | every ~2s | existing `{normal:[], low:[], ready:[], status}` |
 | `/christmas/scheduler/name_estimate` | fppscheduler (existing) | ~1s | existing `{estimated_seconds, message}` |
-| `/christmas/sms/received` | christmasnamechecker (**new**) | every inbound SMS | see below |
+| `/christmas/sms/received` | christmasnamechecker (**new**) | one message per name in every inbound SMS | see below |
 | `/christmas/nameBatch` | xlights-render (**new**) | after each regular (non-midnight) batch is rendered and sent to FPP | `{ts, names:[{name, from, ts}]}` |
 | `/christmas/vote/visitors` | Christmas-Vote-now (**new**) | every 15s | `{connected}` |
 
@@ -34,15 +34,16 @@ Capture only. Nothing new is added to `/christmas/vote/stats` until capture is p
   "ts": 1734300000.123,
   "from": "+15131234567",
   "text": "Doug and Zxqv",
-  "names": ["DOUG"],
+  "name": "DOUG",
   "result": "approved",
   "quoted_seconds": 240,
   "city": "CINCINNATI", "state": "OH", "zip": "45202", "country": "US"
 }
 ```
 
-- `result`: `approved` (sent to normal queue), `low` (valid but sender over the 15-min limit), `rejected` (no valid names), `blocked` (number blocked).
-- `quoted_seconds`: the wait put in the reply text, in seconds. `null` when no number was quoted (outside display hours, low, rejected, blocked).
+- One message per name found in the text, all sharing the text's `ts`. A text with no words sends one message with `name: null`.
+- `result` per name: `approved` (sent to normal queue), `low` (valid but sender over the 15-min limit), `rejected` (not an approved name), `blocked` (number blocked; applies to every name in the text).
+- `quoted_seconds`: the wait put in the reply text, in seconds, on approved names only. `null` when no number was quoted (outside display hours, low, rejected, blocked).
 - `ts` is the same value placed in the approved-name messages' `ts`, so a displayed name can be matched back to its text.
 - Phone number is stored as-is, consistent with the existing `name.source` column. City/state/zip are approved for storage.
 
@@ -58,13 +59,13 @@ All TimescaleDB hypertables on `ts`.
 | --- | --- | --- |
 | `name_queue` | ts, normal_cnt, low_cnt, ready_cnt, status | on any change of the 4 values, else once per 60s |
 | `name_estimate` | ts, estimated_seconds, message | on change but no more than every 15s, else once per 60s (value counts down every second) |
-| `sms_received` | ts, phone, body, names (text[]), result, quoted_seconds, city, state, zip, country | every message |
+| `sms_received` | ts, phone, body, name, result, quoted_seconds, city, state, zip, country | every message (one row per name; migration 4 converted the original `names` array column) |
 | `name_batch` | ts, name, source, submitted_ts | one row per name in a batch |
 | `website_visitors` | ts, connected | every message |
 
 `ts` for `sms_received` and `name_batch` comes from the payload; others use `NOW()`.
 
-View `name_wait`: for each non-`System` row of `name_batch`, `displayed_ts` = first `event` row with `name='planSong' AND argument='Internal_Wish_Name'` at or after the batch `ts`; `wait_seconds = displayed_ts - submitted_ts`; `quoted_seconds` joined from `sms_received` on same phone with `|ts - submitted_ts| < 2s` (all names in one text share that text's `ts` and quote; null for admin names).
+View `name_wait`: for each non-`System` row of `name_batch`, `displayed_ts` = first `event` row with `name='planSong' AND argument='Internal_Wish_Name'` at or after the batch `ts`; `wait_seconds = displayed_ts - submitted_ts`; `quoted_seconds` joined from `sms_received` on same phone and name with `|ts - submitted_ts| < 2s` (null for admin names).
 
 ## Grafana
 
