@@ -29,6 +29,12 @@ The service bridges your MQTT broker and a TimescaleDB (PostgreSQL) database. It
 | `/christmas/personsNameFront`                        | Visitor name (front display)        |
 | `/christmas/personsNameLow`                          | Visitor name (low display)          |
 | `/christmas/nameAction`                              | Name action events                  |
+| `/christmas/nameQueue`                               | Name queue sizes and status (on change, else every 60s) |
+| `/christmas/scheduler/name_estimate`                 | Name wait estimate (on change, at most every 15s; else every 60s) |
+| `/christmas/nameBatch`                               | Names in each rendered batch, with submit time |
+| `/christmas/sms/received`                            | Every inbound text: result, quoted wait, city/state/zip |
+| `/christmas/vote/visitors`                           | Open website connections (every 15s) |
+| `car-counter/+`                                      | Cars currently parked, per camera   |
 | `shelly/+/status/temperature:0`                      | Shelly temperature                  |
 | `shelly/+/status/humidity:0`                         | Shelly humidity                     |
 | `shelly/+/status/devicepower:0`                      | Shelly battery percent/voltage      |
@@ -46,6 +52,14 @@ All tables are TimescaleDB hypertables partitioned by timestamp (`ts`). Migratio
 | `event`        | ts, name, argument               |
 | `button`       | ts, button                       |
 | `sensor`       | ts, device, sensor, value, label |
+| `car_counting` | ts, camera, count, processing_seconds, status |
+| `name_queue`   | ts, normal_cnt, low_cnt, ready_cnt, status |
+| `name_estimate` | ts, estimated_seconds, message |
+| `name_batch`   | ts, name, source, submitted_ts |
+| `sms_received` | ts, phone, body, names, result, quoted_seconds, city, state, zip, country |
+| `website_visitors` | ts, connected |
+
+The `name_wait` view joins `name_batch` to the next `Internal_Wish_Name` play (from `event`) and to the text that submitted each name, giving actual vs. quoted wait per name.
 
 ## Prerequisites
 
@@ -146,6 +160,9 @@ Pre-built Grafana dashboard JSON files are in the `dashboards/` directory:
 | `house_temp.json`     | Indoor/outdoor temperature from Shelly sensors |
 | `phone_data.json`     | Visitor phone interactions                     |
 | `tunnel_buttons.json` | Physical button press counts                   |
+| `name_queue.json`     | Name queue size vs. website visitors and cars  |
+| `name_wait.json`      | Quoted vs. actual name wait                    |
+| `sms.json`            | Texts by result, top non-approved names, locations |
 
 Import them via Grafana → Dashboards → Import, pointed at your TimescaleDB datasource.
 

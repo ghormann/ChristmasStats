@@ -1,0 +1,155 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_CHRISTMAS",
+      "label": "Christmas Stats (TimescaleDB)",
+      "type": "datasource",
+      "pluginId": "grafana-postgresql-datasource",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "uid": "xmas-sms",
+  "title": "Texts Received",
+  "tags": [
+    "christmas"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Texts per 15 min by result",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "pointSize": 6,
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '15m'),\n       COUNT(*) FILTER (WHERE result = 'approved') AS \"Approved\",\n       COUNT(*) FILTER (WHERE result = 'low') AS \"Low priority\",\n       COUNT(*) FILTER (WHERE result = 'rejected') AS \"Not approved\",\n       COUNT(*) FILTER (WHERE result = 'blocked') AS \"Blocked\"\nFROM sms_received\nWHERE $__timeFilter(ts)\nGROUP BY 1\nORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "Most common non-approved texts",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "options": {
+        "showHeader": true
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT UPPER(TRIM(body)) AS \"Text\", COUNT(*) AS \"Times\", COUNT(DISTINCT phone) AS \"Phones\", MAX(ts) AS \"Last seen\"\nFROM sms_received\nWHERE $__timeFilter(ts) AND result = 'rejected'\nGROUP BY 1\nORDER BY 2 DESC\nLIMIT 50"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Where texts come from",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "options": {
+        "showHeader": true
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "refId": "A",
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT city AS \"City\", state AS \"State\", zip AS \"Zip\", COUNT(DISTINCT phone) AS \"Phones\", COUNT(*) AS \"Texts\"\nFROM sms_received\nWHERE $__timeFilter(ts)\nGROUP BY 1, 2, 3\nORDER BY 4 DESC\nLIMIT 50"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  }
+}

@@ -63,6 +63,45 @@ async function insertVote(playlist, source) {
     );
 }
 
+async function insertNameQueue(normal, low, ready, status) {
+    await pool.query(
+        'INSERT INTO name_queue (normal_cnt, low_cnt, ready_cnt, status) VALUES ($1, $2, $3, $4)',
+        [normal, low, ready, status]
+    );
+}
+
+async function insertNameEstimate(estimated_seconds, message) {
+    await pool.query(
+        'INSERT INTO name_estimate (estimated_seconds, message) VALUES ($1, $2)',
+        [estimated_seconds, message]
+    );
+}
+
+async function insertSmsReceived(sms) {
+    await pool.query(
+        'INSERT INTO sms_received (ts, phone, body, names, result, quoted_seconds, city, state, zip, country) VALUES (to_timestamp($1), $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+        [
+            sms.ts, sms.from, sms.text, sms.names || [], sms.result,
+            sms.quoted_seconds ?? null, sms.city ?? null, sms.state ?? null, sms.zip ?? null, sms.country ?? null,
+        ]
+    );
+}
+
+async function insertNameBatch(ts, names) {
+    if (names.length === 0) return;
+    await pool.query(
+        'INSERT INTO name_batch (ts, name, source, submitted_ts) SELECT to_timestamp($1), n, s, to_timestamp(t) FROM unnest($2::text[], $3::text[], $4::float8[]) AS u(n, s, t)',
+        [ts, names.map(n => n.name), names.map(n => n.from), names.map(n => n.ts)]
+    );
+}
+
+async function insertWebsiteVisitors(connected) {
+    await pool.query(
+        'INSERT INTO website_visitors (connected) VALUES ($1)',
+        [connected]
+    );
+}
+
 async function getUniquePhones() {
     const periods = [
         { minutes: 15,     label: '15 min' },
@@ -229,4 +268,9 @@ module.exports = {
     insertSensor,
     insertCarCount,
     getMaxCars,
+    insertNameQueue,
+    insertNameEstimate,
+    insertSmsReceived,
+    insertNameBatch,
+    insertWebsiteVisitors,
 };
