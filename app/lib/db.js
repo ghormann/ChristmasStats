@@ -102,7 +102,7 @@ async function insertWebsiteVisitors(connected) {
     );
 }
 
-async function getUniquePhones() {
+async function getUniquePhones(seasonMinutes) {
     const periods = [
         { minutes: 15,     label: '15 min' },
         { minutes: 30,     label: '30 min' },
@@ -110,7 +110,7 @@ async function getUniquePhones() {
         { minutes: 120,    label: '2 hours' },
         { minutes: 240,    label: '4 hours' },
         { minutes: 1440,   label: '1 day' },
-        { minutes: 432000, label: '1 year' },
+        { minutes: seasonMinutes, label: 'This season' },
     ];
     return Promise.all(periods.map(async (p) => {
         const { rows } = await pool.query(
@@ -145,11 +145,14 @@ async function getPowerToday() {
     return { total: r.tot, cnt: r.cnt, mints: r.mints };
 }
 
+// Playlists that are real songs, not interstitials or test sequences.
+const SONG_ONLY = `argument NOT IN ('TuneTo','off','Intro','Good_Night','TheHormanns')
+         AND argument NOT LIKE 'Test%' AND argument NOT LIKE 'Internal%' AND argument NOT LIKE 'Midnight%'`;
+
 async function getTopPlayedSongs(minutes) {
     const { rows } = await pool.query(
         `SELECT argument, COUNT(1)::int cnt FROM event WHERE name = 'planSong'
-         AND argument NOT IN ('TuneTo','off','Intro','Good_Night','TheHormanns')
-         AND argument NOT LIKE 'Test%' AND argument NOT LIKE 'Internal%' AND argument NOT LIKE 'Midnight%'
+         AND ${SONG_ONLY}
          AND ts > NOW() - ($1 * INTERVAL '1 minute')
          GROUP BY argument ORDER BY 2 DESC LIMIT 20`,
         [minutes]
@@ -157,7 +160,7 @@ async function getTopPlayedSongs(minutes) {
     return rows.map(r => ({ name: r.argument, cnt: r.cnt }));
 }
 
-async function getUniqueVoters() {
+async function getUniqueVoters(seasonMinutes) {
     const periods = [
         { minutes: 15,     label: '15 min' },
         { minutes: 30,     label: '30 min' },
@@ -165,7 +168,7 @@ async function getUniqueVoters() {
         { minutes: 120,    label: '2 hours' },
         { minutes: 240,    label: '4 hours' },
         { minutes: 1440,   label: '1 day' },
-        { minutes: 432000, label: '1 year' },
+        { minutes: seasonMinutes, label: 'This season' },
     ];
     return Promise.all(periods.map(async (p) => {
         const { rows } = await pool.query(
@@ -247,6 +250,34 @@ async function getTopSnowmenVotes(minutes) {
     return rows.map(r => ({ snowman: r.snowman, cnt: r.cnt }));
 }
 
+async function getSeasonTotals(minutes) {
+    // A segment runs until the next planSong; capping each at 20 minutes keeps
+    // a gap in the events (FPP down, broker restart) from counting as show time.
+    const { rows } = await pool.query(
+        `WITH e AS (
+             SELECT ts, argument, LEAD(ts) OVER (ORDER BY ts) AS next_ts
+             FROM event
+             WHERE name = 'planSong' AND ts > NOW() - ($1 * INTERVAL '1 minute')
+         )
+         SELECT
+             (SELECT COALESCE(SUM(EXTRACT(EPOCH FROM LEAST(COALESCE(next_ts, NOW()) - ts, INTERVAL '20 minutes'))), 0)
+                FROM e WHERE argument NOT IN ('Internal_off', 'off'))::float8 / 3600 AS show_hours,
+             (SELECT COUNT(1) FROM e WHERE ${SONG_ONLY})::int AS songs_played,
+             (SELECT COUNT(1) FROM name WHERE ts > NOW() - ($1 * INTERVAL '1 minute'))::int AS names_shown,
+             (SELECT COUNT(1) FROM song_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute'))::int AS song_votes,
+             (SELECT COUNT(1) FROM snowman_vote WHERE ts > NOW() - ($1 * INTERVAL '1 minute'))::int AS snowman_votes`,
+        [minutes]
+    );
+    const r = rows[0];
+    return {
+        showHours: r.show_hours,
+        songsPlayed: r.songs_played,
+        namesShown: r.names_shown,
+        songVotes: r.song_votes,
+        snowmanVotes: r.snowman_votes,
+    };
+}
+
 module.exports = {
     connect,
     insertName,
@@ -260,6 +291,7 @@ module.exports = {
     insertPower,
     insertButton,
     getSongPower,
+    getSeasonTotals,
     getTotalPower,
     getPowerToday,
     getTopSnowmenVotes,

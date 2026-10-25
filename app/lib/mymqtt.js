@@ -1,6 +1,7 @@
 const mqtt = require("mqtt");
 const mqttPattern = require("mqtt-pattern");
 const db = require("./db.js");
+const { seasonStart, minutesSinceSeasonStart } = require("./season.js");
 const { createRecorder } = require("./recorder.js");
 
 var current_status = "Unknown";
@@ -300,7 +301,7 @@ async function getYearPower() {
     // only refresh every 20 min
     if (diff > 1000 * 60 * 20) {
         console.log("Refreshing yearly power: ", diff);
-        (cache_yearPower.data = await db.getTotalPower(288000)), // 200 days
+        (cache_yearPower.data = await db.getTotalPower(minutesSinceSeasonStart())),
             (cache_yearPower.when = now);
     }
     return cache_yearPower.data;
@@ -320,6 +321,7 @@ async function publishResults() {
     let startTime = Date.now();
 
     try {
+        const season = minutesSinceSeasonStart();
         rc = {
             songPower_1hr:        addSongDollars(await db.getSongPower(60), config.pricePerKWH),
             songPower_24hr:       addSongDollars(await db.getSongPower(1440), config.pricePerKWH),
@@ -328,27 +330,28 @@ async function publishResults() {
             totalPower_year:      addDollars(await getYearPower(), config.pricePerKWH),
             topNames_1hr:         await db.getTopNames(60),
             topNames_24hr:        await db.getTopNames(1440),
-            topNames_year:        await db.getTopNames(288000),
+            topNames_year:        await db.getTopNames(season),
             topButton_1hr:        await db.getTopButtons(60),
             topButton_12hr:       await db.getTopButtons(720),
             topButton_24hr:       await db.getTopButtons(1440),
-            topButton_year:       await db.getTopButtons(288000),
+            topButton_year:       await db.getTopButtons(season),
             topSongs_15min:       await db.getTopVotes(15),
             topSongs_1hr:         await db.getTopVotes(60),
             topSongs_24hr:        await db.getTopVotes(1440),
-            topSongs_year:        await db.getTopVotes(288000),
+            topSongs_year:        await db.getTopVotes(season),
             topSnowmen_1hr:       await db.getTopSnowmenVotes(60),
             topSnowmen_24hr:      await db.getTopSnowmenVotes(1440),
-            topSnowmen_year:      await db.getTopSnowmenVotes(288000),
+            topSnowmen_year:      await db.getTopSnowmenVotes(season),
             topPlayedSongs_1hr:   await db.getTopPlayedSongs(60),
             topPlayedSongs_24hr:  await db.getTopPlayedSongs(1440),
-            topPlayedSongs_year:  await db.getTopPlayedSongs(288000),
+            topPlayedSongs_year:  await db.getTopPlayedSongs(season),
             maxCars_1hr:          await db.getMaxCars(60),
             maxCars_8hr:          await db.getMaxCars(480),
             maxCars_24hr:         await db.getMaxCars(1440),
-            maxCars_year:         await db.getMaxCars(288000),
-            topVoters:            await db.getUniqueVoters(),
-            topPhones:            await db.getUniquePhones(),
+            maxCars_year:         await db.getMaxCars(season),
+            topVoters:            await db.getUniqueVoters(season),
+            topPhones:            await db.getUniquePhones(season),
+            seasonTotals:         { ...(await db.getSeasonTotals(season)), seasonStart: seasonStart() },
             uptime:               process.uptime(),
         };
         console.log(`Publishing ${topic} (${Date.now() - startTime}ms)`);

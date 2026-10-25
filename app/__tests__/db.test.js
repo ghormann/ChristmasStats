@@ -184,6 +184,34 @@ describe('getUniquePhones', () => {
     });
 });
 
+describe('getUniqueVoters with season', () => {
+    it('ends with a This season period covering the given minutes', async () => {
+        mockQuery.mockResolvedValue({ rows: [{ cnt: 9 }] });
+        const result = await db.getUniqueVoters(5000);
+        expect(result[result.length - 1]).toEqual({ minutes: 5000, label: 'This season', cnt: 9 });
+        expect(mockQuery).toHaveBeenLastCalledWith(expect.stringContaining('song_vote'), [5000]);
+    });
+});
+
+describe('getUniquePhones with season', () => {
+    it('ends with a This season period covering the given minutes', async () => {
+        mockQuery.mockResolvedValue({ rows: [{ cnt: 4 }] });
+        const result = await db.getUniquePhones(5000);
+        expect(result[result.length - 1]).toEqual({ minutes: 5000, label: 'This season', cnt: 4 });
+    });
+});
+
+describe('getSeasonTotals', () => {
+    it('maps the totals row', async () => {
+        mockQuery.mockResolvedValue({
+            rows: [{ show_hours: 12.5, songs_played: 240, names_shown: 31, song_votes: 80, snowman_votes: 20 }],
+        });
+        const result = await db.getSeasonTotals(5000);
+        expect(result).toEqual({ showHours: 12.5, songsPlayed: 240, namesShown: 31, songVotes: 80, snowmanVotes: 20 });
+        expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('planSong'), [5000]);
+    });
+});
+
 describe('getPowerToday', () => {
     it('returns today power summary', async () => {
         mockQuery.mockResolvedValue({
