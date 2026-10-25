@@ -121,8 +121,31 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          }
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "IDLE": {
+                  "color": "blue",
+                  "index": 0,
+                  "text": "Idle"
+                },
+                "GENERATING": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "Generating"
+                },
+                "READY": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "Ready"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
