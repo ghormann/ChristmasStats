@@ -13,6 +13,7 @@ The service bridges your MQTT broker and a TimescaleDB (PostgreSQL) database. It
 - Stores **Shelly device data** (temperature, humidity, battery)
 - Records **button presses** from physical FPP buttons
 - Publishes aggregated stats back to `/christmas/vote/stats` every 60 seconds and current power to `/christmas/todayPower` every 2 seconds
+- "Year" stats (`*_year`, the last row of `topVoters`/`topPhones`) and `seasonTotals` cover the current season: since the most recent November 15 (midnight Eastern)
 
 ## MQTT Topics Subscribed
 
