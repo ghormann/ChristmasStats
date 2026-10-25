@@ -98,7 +98,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT to_char(hour, 'FM00') || ':00' AS \"Hour\", AVG(max_count) AS \"Avg cars\"\nFROM (\n  SELECT date_trunc('minute', ts) AS minute,\n         date_trunc('hour', ts AT TIME ZONE 'America/New_York')::time AS hour,\n         MAX(count) AS max_count\n  FROM car_counting\n  WHERE $__timeFilter(ts)\n  GROUP BY 1, 2\n) per_minute\nGROUP BY hour\nORDER BY hour",
+          "rawSql": "SELECT lpad(hour::text, 2, '0') || ':00' AS \"Hour\", AVG(max_count) AS \"Avg cars\"\nFROM (\n  SELECT date_trunc('minute', ts) AS minute,\n         EXTRACT(HOUR FROM ts AT TIME ZONE 'America/New_York')::int AS hour,\n         MAX(count) AS max_count\n  FROM car_counting\n  WHERE $__timeFilter(ts)\n  GROUP BY 1, 2\n) per_minute\nGROUP BY hour\nORDER BY (hour + 12) % 24",
           "refId": "A"
         }
       ],
@@ -115,7 +115,7 @@
           "mode": "single"
         }
       },
-      "description": "Per-minute peak, averaged by local hour.",
+      "description": "Per-minute peak, averaged by local hour, starting at noon.",
       "id": 2
     },
     {
