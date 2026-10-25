@@ -150,19 +150,17 @@ node index.js
 
 Pre-built Grafana dashboard JSON files are in the `dashboards/` directory:
 
-| File                  | Shows                                          |
-| --------------------- | ---------------------------------------------- |
-| `power_total.json`    | Total power consumption over time              |
-| `raw_amps_port.json`  | Per-circuit amperage                           |
-| `fpp_temp.json`       | FPP controller temperatures                    |
-| `fpp_voltage.json`    | FPP controller voltages                        |
-| `fpp_uptime.json`     | FPP player uptime                              |
-| `house_temp.json`     | Indoor/outdoor temperature from Shelly sensors |
-| `phone_data.json`     | Visitor phone interactions                     |
-| `tunnel_buttons.json` | Physical button press counts                   |
-| `name_queue.json`     | Name queue size vs. website visitors and cars  |
-| `name_wait.json`      | Quoted vs. actual name wait                    |
-| `sms.json`            | Texts by result, top non-approved names, locations |
+| File                 | Shows                                              |
+| -------------------- | -------------------------------------------------- |
+| `power_total.json`   | Total power consumption over time                  |
+| `raw_amps_port.json` | Per-port amperage                                  |
+| `fpp_temp.json`      | FPP controller temperatures                        |
+| `fpp_uptime.json`    | FPP player uptime                                  |
+| `house_temp.json`    | Indoor/outdoor temperature from Shelly sensors     |
+| `car_counting.json`  | Car counts and processing time                     |
+| `name_queue.json`    | Name queue size vs. website visitors and cars      |
+| `name_wait.json`     | Quoted vs. actual name wait                        |
+| `sms.json`           | Texts by result, top non-approved names, locations |
 
 Import them via Grafana → Dashboards → Import, pointed at your TimescaleDB datasource.
 

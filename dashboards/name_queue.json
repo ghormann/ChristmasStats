@@ -8,45 +8,27 @@
       "pluginName": "PostgreSQL"
     }
   ],
-  "uid": "xmas-name-queue",
-  "title": "Name Queue & Crowd",
-  "tags": [
-    "christmas"
-  ],
-  "timezone": "browser",
-  "editable": true,
-  "schemaVersion": 39,
-  "version": 1,
-  "time": {
-    "from": "now-24h",
-    "to": "now"
+  "annotations": {
+    "list": []
   },
+  "editable": true,
   "panels": [
     {
-      "id": 1,
-      "type": "timeseries",
-      "title": "Name queue vs. website visitors and cars",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_CHRISTMAS}"
       },
-      "gridPos": {
-        "h": 14,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
           "custom": {
             "drawStyle": "line",
-            "lineWidth": 2,
             "fillOpacity": 10,
-            "showPoints": "never",
+            "lineWidth": 2,
             "pointSize": 6,
+            "showPoints": "never",
             "spanNulls": true
-          }
+          },
+          "unit": "short"
         },
         "overrides": [
           {
@@ -75,6 +57,13 @@
           }
         ]
       },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
       "options": {
         "legend": {
           "displayMode": "list",
@@ -92,49 +81,42 @@
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_CHRISTMAS}"
           },
-          "refId": "A",
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS time, normal_cnt AS \"Queue: normal\", low_cnt AS \"Queue: low\", ready_cnt AS \"Queue: ready\"\nFROM name_queue\nWHERE $__timeFilter(ts)\nORDER BY 1"
+          "rawSql": "SELECT ts AS time, normal_cnt AS \"Queue: normal\", low_cnt AS \"Queue: low\", ready_cnt AS \"Queue: ready\"\nFROM name_queue\nWHERE $__timeFilter(ts)\nORDER BY 1",
+          "refId": "A"
         },
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_CHRISTMAS}"
           },
-          "refId": "B",
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS time, connected AS \"Website visitors\"\nFROM website_visitors\nWHERE $__timeFilter(ts)\nORDER BY 1"
+          "rawSql": "SELECT ts AS time, connected AS \"Website visitors\"\nFROM website_visitors\nWHERE $__timeFilter(ts)\nORDER BY 1",
+          "refId": "B"
         },
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_CHRISTMAS}"
           },
-          "refId": "C",
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT minute AS time, SUM(max_count) AS \"Cars\"\nFROM (\n  SELECT $__timeGroup(ts, '1m') AS minute, camera, MAX(count) AS max_count\n  FROM car_counting\n  WHERE $__timeFilter(ts)\n  GROUP BY 1, 2\n) per_camera\nGROUP BY 1\nORDER BY 1"
+          "rawSql": "SELECT minute AS time, SUM(max_count) AS \"Cars\"\nFROM (\n  SELECT $__timeGroup(ts, '1m') AS minute, camera, MAX(count) AS max_count\n  FROM car_counting\n  WHERE $__timeFilter(ts)\n  GROUP BY 1, 2\n) per_camera\nGROUP BY 1\nORDER BY 1",
+          "refId": "C"
         }
-      ]
+      ],
+      "title": "Name queue vs. website visitors and cars",
+      "type": "timeseries"
     },
     {
-      "id": 2,
-      "type": "state-timeline",
-      "title": "Name generator status",
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_CHRISTMAS}"
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 24,
-        "x": 0,
-        "y": 14
       },
       "fieldConfig": {
         "defaults": {
@@ -144,9 +126,16 @@
         },
         "overrides": []
       },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 2,
       "options": {
-        "showValue": "never",
-        "mergeValues": true
+        "mergeValues": true,
+        "showValue": "never"
       },
       "targets": [
         {
@@ -154,19 +143,30 @@
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_CHRISTMAS}"
           },
-          "refId": "A",
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT ts AS time, status AS \"Status\"\nFROM name_queue\nWHERE $__timeFilter(ts)\nORDER BY 1"
+          "rawSql": "SELECT ts AS time, status AS \"Status\"\nFROM name_queue\nWHERE $__timeFilter(ts)\nORDER BY 1",
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Name generator status",
+      "type": "state-timeline"
     }
+  ],
+  "schemaVersion": 39,
+  "tags": [
+    "christmas"
   ],
   "templating": {
     "list": []
   },
-  "annotations": {
-    "list": []
-  }
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Name Queue & Crowd",
+  "uid": "xmas-name-queue",
+  "version": 1
 }
