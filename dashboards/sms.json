@@ -151,5 +151,6 @@
   "timezone": "browser",
   "title": "Texts Received",
   "uid": "xmas-sms",
-  "version": 1
+  "version": 1,
+  "refresh": "1m"
 }

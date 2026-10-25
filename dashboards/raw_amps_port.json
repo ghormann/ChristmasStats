@@ -9,106 +9,36 @@
     }
   ],
   "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
+    "list": []
   },
   "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
-  "links": [],
   "panels": [
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_CHRISTMAS}"
       },
+      "type": "timeseries",
+      "title": "Amps by port",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 14
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
+          "unit": "amp",
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
           }
         },
         "overrides": []
       },
-      "gridPos": {
-        "h": 16,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.6.0",
       "targets": [
         {
           "datasource": {
@@ -118,34 +48,80 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  time_bucket('10 seconds', ts) AS time,\r\n  AVG(s1) AS s1_10sec,\r\n  AVG(s2) AS s2_10sec,\r\n  AVG(s3) AS s3_10sec,\r\n  AVG(s4) AS s4_10sec,\r\n  AVG(s5) AS s5_10sec,\r\n  AVG(s6) AS s6_10sec,\r\n  AVG(s7) AS s7_10sec,\r\n  AVG(s8) AS s8_10sec,\r\n  AVG(s9) AS s9_10sec\r\nFROM power\r\nWHERE $__timeFilter(ts)\r\nGROUP BY time\r\nORDER BY time",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
+          "rawSql": "SELECT $__timeGroupAlias(ts, $__interval), AVG(s1) AS \"Port 1\", AVG(s2) AS \"Port 2\", AVG(s3) AS \"Port 3\", AVG(s4) AS \"Port 4\", AVG(s5) AS \"Port 5\", AVG(s6) AS \"Port 6\", AVG(s7) AS \"Port 7\", AVG(s8) AS \"Port 8\", AVG(s9) AS \"Port 9\"\nFROM power\nWHERE $__timeFilter(ts)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
         }
       ],
-      "title": "Amps by port (10s groupings)",
-      "type": "timeseries"
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "id": 1
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "bargauge",
+      "title": "Average amps by port",
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "color": {
+            "mode": "palette-classic"
+          },
+          "decimals": 2,
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(s1) AS \"Port 1\", AVG(s2) AS \"Port 2\", AVG(s3) AS \"Port 3\", AVG(s4) AS \"Port 4\", AVG(s5) AS \"Port 5\", AVG(s6) AS \"Port 6\", AVG(s7) AS \"Port 7\", AVG(s8) AS \"Port 8\", AVG(s9) AS \"Port 9\"\nFROM power\nWHERE $__timeFilter(ts)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "orientation": "vertical",
+        "displayMode": "basic",
+        "showUnfilled": true,
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "id": 2
     }
   ],
-  "preload": false,
-  "schemaVersion": 41,
-  "tags": [],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "tags": [
+    "christmas"
+  ],
   "templating": {
     "list": []
   },
@@ -153,9 +129,7 @@
     "from": "now-6h",
     "to": "now"
   },
-  "timepicker": {},
   "timezone": "browser",
   "title": "Power by Port",
-  "uid": "efkwissjqxurkb",
-  "version": 3
+  "uid": "efkwissjqxurkb"
 }

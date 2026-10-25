@@ -9,137 +9,147 @@
     }
   ],
   "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
+    "list": []
   },
   "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
-  "links": [],
   "panels": [
     {
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "${DS_CHRISTMAS}"
       },
+      "type": "stat",
+      "title": "Current draw",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
           },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT total AS \"Amps\" FROM power ORDER BY ts DESC LIMIT 1",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      },
+      "id": 1
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "stat",
+      "title": "Range average / peak",
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 18,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT AVG(total) AS \"Average\", MAX(total) AS \"Peak\"\nFROM power\nWHERE $__timeFilter(ts)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "orientation": "auto"
+      },
+      "id": 2
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "timeseries",
+      "title": "Total amps",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 24,
+        "h": 12
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp",
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
           }
         },
         "overrides": [
           {
             "matcher": {
               "id": "byName",
-              "options": "total"
+              "options": "Peak"
             },
             "properties": [
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "detail"
-            },
-            "properties": [
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
+                "id": "custom.lineWidth",
+                "value": 1
               }
             ]
           }
         ]
       },
-      "gridPos": {
-        "h": 13,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.6.0",
       "targets": [
         {
           "datasource": {
@@ -149,73 +159,87 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  time_bucket('10 seconds', ts) AS time,\r\n  AVG(total) AS detail\r\nFROM power\r\nWHERE $__timeFilter(ts)\r\nGROUP BY time\r\nORDER BY time",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
+          "rawSql": "SELECT $__timeGroupAlias(ts, $__interval), AVG(total) AS \"Average\", MAX(total) AS \"Peak\"\nFROM power\nWHERE $__timeFilter(ts)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "id": 3
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "barchart",
+      "title": "Average amps by song",
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 24,
+        "h": 14
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "unit": "amp"
+        },
+        "overrides": []
+      },
+      "targets": [
         {
           "datasource": {
             "type": "grafana-postgresql-datasource",
             "uid": "${DS_CHRISTMAS}"
           },
           "editorMode": "code",
-          "format": "time_series",
-          "hide": false,
+          "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  time_bucket('1 minute', ts) AS time,\r\n  AVG(total) AS avg_1m\r\nFROM power\r\nWHERE $__timeFilter(ts)\r\nGROUP BY time\r\nORDER BY time",
-          "refId": "B",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
+          "rawSql": "SELECT song AS \"Song\", AVG(total) AS \"Average amps\", MAX(total) AS \"Peak amps\"\nFROM power\nWHERE $__timeFilter(ts) AND song IS NOT NULL AND song <> ''\nGROUP BY 1\nORDER BY 2 DESC",
+          "refId": "A"
         }
       ],
-      "title": "Total Amps",
-      "type": "timeseries"
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "xTickLabelMaxLength": 24,
+        "legend": {
+          "showLegend": false,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "id": 4
     }
   ],
-  "preload": false,
-  "schemaVersion": 41,
-  "tags": [],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "tags": [
+    "christmas"
+  ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
-  "timepicker": {},
   "timezone": "browser",
   "title": "Total Power",
-  "uid": "afkwifk405csga",
-  "version": 3
+  "uid": "afkwifk405csga"
 }

@@ -169,5 +169,6 @@
   "timezone": "browser",
   "title": "Name Wait: Quoted vs Actual",
   "uid": "xmas-name-wait",
-  "version": 1
+  "version": 1,
+  "refresh": "1m"
 }
