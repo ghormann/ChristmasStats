@@ -106,7 +106,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT minute AS time, SUM(max_count) AS \"Cars\"\nFROM (\n  SELECT $__timeGroup(ts, '1m') AS minute, camera, MAX(count) AS max_count\n  FROM car_counting\n  WHERE $__timeFilter(ts)\n  GROUP BY 1, 2\n) per_camera\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT minute AS time, SUM(max_count) AS \"Cars\"\nFROM (\n  SELECT $__timeGroup(ts, $__interval) AS minute, camera, MAX(count) AS max_count\n  FROM car_counting\n  WHERE $__timeFilter(ts)\n  GROUP BY 1, 2\n) per_camera\nGROUP BY 1\nORDER BY 1",
           "refId": "C"
         }
       ],
@@ -121,8 +121,31 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          }
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "IDLE": {
+                  "color": "blue",
+                  "index": 0,
+                  "text": "Idle"
+                },
+                "GENERATING": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "Generating"
+                },
+                "READY": {
+                  "color": "green",
+                  "index": 2,
+                  "text": "Ready"
+                }
+              }
+            }
+          ]
         },
         "overrides": []
       },
@@ -152,8 +175,64 @@
       ],
       "title": "Name generator status",
       "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "timeseries",
+      "title": "Name generator actions",
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 24,
+        "h": 7
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '15m'),\n       COUNT(*) FILTER (WHERE argument = 'GENERATE') AS \"Generate\",\n       COUNT(*) FILTER (WHERE argument = 'RESET') AS \"Reset\"\nFROM event\nWHERE name = 'nameAction' AND $__timeFilter(ts)\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "id": 3
     }
   ],
+  "refresh": "1m",
   "schemaVersion": 39,
   "tags": [
     "christmas"
@@ -167,6 +246,5 @@
   },
   "timezone": "browser",
   "title": "Name Queue & Crowd",
-  "uid": "xmas-name-queue",
-  "version": 1
+  "uid": "xmas-name-queue"
 }

@@ -1,0 +1,357 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_CHRISTMAS",
+      "label": "Christmas Stats (TimescaleDB)",
+      "type": "datasource",
+      "pluginId": "grafana-postgresql-datasource",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "table",
+      "title": "Last row per table",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 14
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Age"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 900
+                    },
+                    {
+                      "color": "red",
+                      "value": 3600
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT 'power' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM power\nUNION ALL\nSELECT 'sensor' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM sensor\nUNION ALL\nSELECT 'car_counting' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM car_counting\nUNION ALL\nSELECT 'event' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM event\nUNION ALL\nSELECT 'website_visitors' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM website_visitors\nUNION ALL\nSELECT 'name_queue' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM name_queue\nUNION ALL\nSELECT 'name_estimate' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM name_estimate\nUNION ALL\nSELECT 'name' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM name\nUNION ALL\nSELECT 'name_batch' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM name_batch\nUNION ALL\nSELECT 'sms_received' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM sms_received\nUNION ALL\nSELECT 'song_vote' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM song_vote\nUNION ALL\nSELECT 'snowman_vote' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM snowman_vote\nUNION ALL\nSELECT 'button' AS \"Table\", MAX(ts) AS \"Last row\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\" FROM button\nORDER BY 3 NULLS FIRST",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Ignores the time picker. Event-driven tables (texts, votes, names) go quiet when nobody is interacting, so orange/red there is normal off-hours.",
+      "id": 1
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "table",
+      "title": "Last report per sensor device",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 14
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Age"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 900
+                    },
+                    {
+                      "color": "red",
+                      "value": 3600
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT device AS \"Device\", MAX(ts) AS \"Last report\", EXTRACT(EPOCH FROM NOW() - MAX(ts)) AS \"Age\",\n       COUNT(*) FILTER (WHERE ts > NOW() - INTERVAL '1 hour') AS \"Rows last hour\"\nFROM sensor\nGROUP BY 1\nORDER BY 3 DESC",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "description": "Ignores the time picker.",
+      "id": 2
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "table",
+      "title": "Car camera status",
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 12,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Age"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 900
+                    },
+                    {
+                      "color": "red",
+                      "value": 3600
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT c.camera AS \"Camera\", last.status AS \"Status\", last.ts AS \"Last row\",\n       EXTRACT(EPOCH FROM NOW() - last.ts) AS \"Age\"\nFROM (SELECT DISTINCT camera FROM car_counting WHERE ts > NOW() - INTERVAL '30 days') c\nCROSS JOIN LATERAL (\n  SELECT status, ts FROM car_counting WHERE camera = c.camera ORDER BY ts DESC LIMIT 1\n) last\nORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm"
+      },
+      "id": 3
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "${DS_CHRISTMAS}"
+      },
+      "type": "timeseries",
+      "title": "Rows written per hour",
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '1h'), 'sensor' AS metric, COUNT(*) AS value\nFROM sensor WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '1h'), 'car_counting' AS metric, COUNT(*) AS value\nFROM car_counting WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '1h'), 'event' AS metric, COUNT(*) AS value\nFROM event WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "${DS_CHRISTMAS}"
+          },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '1h'), 'website_visitors' AS metric, COUNT(*) AS value\nFROM website_visitors WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "description": "power is left out; at ~3,600 rows/hour it flattens the other lines.",
+      "id": 4
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 39,
+  "tags": [
+    "christmas"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "Data Health",
+  "uid": "xmas-data-health"
+}
