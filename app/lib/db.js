@@ -137,9 +137,14 @@ async function getTopButtons(minutes) {
     return rows.map(r => ({ button: r.button, cnt: r.cnt }));
 }
 
+// A show day runs from 1:00 AM Eastern to 1:00 AM the next day, so a show
+// that runs past midnight stays in one day. The database is in UTC, so the
+// boundary is computed in America/New_York explicitly (handles DST).
 async function getPowerToday() {
     const { rows } = await pool.query(
-        `SELECT COUNT(1)::int cnt, SUM(total)::float8 tot, MIN(ts) mints FROM power WHERE ts > CURRENT_DATE - INTERVAL '5 hours'`
+        `SELECT COUNT(1)::int cnt, SUM(total)::float8 tot, MIN(ts) mints FROM power
+         WHERE ts > (date_trunc('day', (NOW() AT TIME ZONE 'America/New_York') - INTERVAL '1 hour')
+                     + INTERVAL '1 hour') AT TIME ZONE 'America/New_York'`
     );
     const r = rows[0];
     return { total: r.tot, cnt: r.cnt, mints: r.mints };

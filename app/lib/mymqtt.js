@@ -1,7 +1,7 @@
 const mqtt = require("mqtt");
 const mqttPattern = require("mqtt-pattern");
 const db = require("./db.js");
-const { seasonStart, minutesSinceSeasonStart } = require("./season.js");
+const { seasonStart, minutesSinceSeasonStart, showDayKey } = require("./season.js");
 const { createRecorder } = require("./recorder.js");
 
 var current_status = "Unknown";
@@ -376,9 +376,12 @@ async function insertName(name, source, type) {
     }
 }
 
+var power_day = null;
+
 async function refreshDailyPower() {
     let startTime = Date.now();
     try {
+        power_day = showDayKey();
         today_power = await db.getPowerToday();
         console.log(`refreshDailyPower took ${Date.now() - startTime}ms`);
     } catch (e) {
@@ -395,10 +398,15 @@ function init(cfg) {
     setInterval(publishResults, 60000); // every 1 minutes
     //setInterval(publishResults, 10000); // debug
 
-    // Reload daily power on startup and every 240 minutes
-    // Forces a reset when day changes
+    // Reload daily power on startup and every 240 minutes, and reset it
+    // as soon as the show day rolls over at 1:00 AM Eastern.
     setTimeout(refreshDailyPower, 5000);
     setInterval(refreshDailyPower, 60000 * 240);
+    setInterval(function () {
+        if (power_day !== null && showDayKey() !== power_day) {
+            refreshDailyPower();
+        }
+    }, 60000);
 
     // Publish Daily power every 2 seconds
     setInterval(publishTodayPower, 2000);
