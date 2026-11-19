@@ -14,4 +14,12 @@ function minutesSinceSeasonStart(now = new Date()) {
     return Math.floor((now.getTime() - seasonStart(now).getTime()) / 60000);
 }
 
-module.exports = { seasonStart, minutesSinceSeasonStart };
+// Identifies the current show day, which rolls over at 1:00 AM Eastern so a
+// show running past midnight counts toward the evening it started.
+// Must match the boundary in db.getPowerToday().
+function showDayKey(now = new Date()) {
+    const shifted = new Date(now.getTime() - 60 * 60 * 1000);
+    return shifted.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+}
+
+module.exports = { seasonStart, minutesSinceSeasonStart, showDayKey };

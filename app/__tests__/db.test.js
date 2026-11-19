@@ -222,6 +222,15 @@ describe('getPowerToday', () => {
         expect(result).toHaveProperty('cnt');
         expect(result).toHaveProperty('mints');
     });
+
+    it('starts the day at 1:00 AM Eastern', async () => {
+        mockQuery.mockResolvedValue({ rows: [{ cnt: 0, tot: null, mints: null }] });
+        await db.getPowerToday();
+        const sql = mockQuery.mock.calls[0][0];
+        expect(sql).toContain("America/New_York");
+        expect(sql).toContain("INTERVAL '1 hour'");
+        expect(sql).not.toContain('CURRENT_DATE');
+    });
 });
 
 describe('insertNameQueue', () => {
